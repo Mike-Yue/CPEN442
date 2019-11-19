@@ -11,10 +11,18 @@ class Lock(models.Model):
         null=False,
     )
 
+    master_user = models.ForeignKey(
+        User,
+        related_name="master_user",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
     users = models.ManyToManyField(
         User,
+        related_name="users",
         blank=True
-    )
+    ) 
 
 
 class Code(models.Model):
