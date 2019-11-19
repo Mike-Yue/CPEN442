@@ -5,7 +5,7 @@ from django.contrib import admin
 from rest_framework.authtoken import views as auth_views
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
+router.register(r'users', views.UserViewSet, base_name="users")
 router.register(r'locks', views.LockViewSet, base_name="locks")
 router.register(r'codes', views.CodeViewSet)
 

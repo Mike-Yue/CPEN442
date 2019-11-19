@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from django.contrib.auth.models import User
 
 class IsMasterUserOnly(permissions.BasePermission):
     """
@@ -7,9 +8,7 @@ class IsMasterUserOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Write permissions are only allowed to the owner of the shopping cart.
-        print(permissions.SAFE_METHODS, request.method)
         if request.method not in permissions.SAFE_METHODS:
             return str(obj.master_user) == str(request.user)
         else:
-            print(obj.users.all())
             return request.user in obj.users.all()
