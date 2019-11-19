@@ -1,6 +1,7 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
+from api.models import Lock, Code
 from rest_framework import viewsets
-from api.serializers import UserSerializer, GroupSerializer
+from api.serializers import UserSerializer, LockSerializer, CodeSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -11,9 +12,13 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+class LockViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
+    queryset = Lock.objects.all()
+    serializer_class = LockSerializer
+
+class CodeViewSet(viewsets.ModelViewSet):
+    queryset = Code.objects.all()
+    serializer_class = CodeSerializer

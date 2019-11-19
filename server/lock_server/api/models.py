@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 class Lock(models.Model):
 
+    def __str__(self):
+        return self.lock_id
+
     lock_id = models.CharField(
         max_length=120,
         unique=True,
@@ -15,6 +18,9 @@ class Lock(models.Model):
 
 
 class Code(models.Model):
+
+    def __str(self):
+        return self.code
 
     code = models.IntegerField()
 

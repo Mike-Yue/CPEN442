@@ -8,7 +8,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'username', 'email', 'groups']
 
 
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
+class LockSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Group
-        fields = ['url', 'name']
+        model = Lock
+        fields = "__all__"
+
+class CodeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Code
+        fields = "__all__"
