@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-
+from api.models import Lock, Code
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
