@@ -1,6 +1,7 @@
 package com.cpen442.gamechangers.doorlockcodegenerator.ui.login;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,7 +11,9 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.cpen442.gamechangers.doorlockcodegenerator.ui.MainActivity;
 import com.cpen442.gamechangers.doorlockcodegenerator.R;
+import com.cpen442.gamechangers.doorlockcodegenerator.ui.signup.SignupActivity;
 
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,10 +32,11 @@ public class LoginActivity extends AppCompatActivity {
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
-        final EditText emailEditText = findViewById(R.id.email);
-        final EditText passwordEditText = findViewById(R.id.password);
-        final Button loginButton = findViewById(R.id.login);
+        final EditText emailEditText = findViewById(R.id.login_email);
+        final EditText passwordEditText = findViewById(R.id.login_password);
+        final Button loginButton = findViewById(R.id.login_submit);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
+        final Button signupButton = findViewById(R.id.login_signup);
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -94,12 +98,20 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        signupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), SignupActivity.class));
+            }
+        });
+
     }
 
     private void loginSucceeded() {
         String welcome = "Welcome !";
         // TODO : initiate successful logged in experience
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
+        startActivity(new Intent(getApplicationContext(), MainActivity.class));
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
