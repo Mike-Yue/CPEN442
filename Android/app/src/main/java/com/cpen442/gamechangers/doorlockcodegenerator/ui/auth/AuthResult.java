@@ -1,4 +1,4 @@
-package com.cpen442.gamechangers.doorlockcodegenerator.ui.login;
+package com.cpen442.gamechangers.doorlockcodegenerator.ui.auth;
 
 
 import androidx.annotation.Nullable;
@@ -6,17 +6,17 @@ import androidx.annotation.Nullable;
 /**
  * Authentication result : success (user details) or error message.
  */
-class LoginResult {
+public class AuthResult {
     @Nullable
     private boolean success;
     @Nullable
     private Integer error;
 
-    LoginResult(@Nullable Integer error) {
+    public AuthResult(@Nullable Integer error) {
         this.error = error;
     }
 
-    LoginResult(@Nullable boolean success) {
+    public AuthResult(@Nullable boolean success) {
         this.success =success;
     }
 

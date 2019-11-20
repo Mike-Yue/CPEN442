@@ -1,4 +1,4 @@
-package com.cpen442.gamechangers.doorlockcodegenerator.ui.login;
+package com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.login;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,9 +11,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.cpen442.gamechangers.doorlockcodegenerator.ui.MainActivity;
+import com.cpen442.gamechangers.doorlockcodegenerator.ui.main.MainActivity;
 import com.cpen442.gamechangers.doorlockcodegenerator.R;
-import com.cpen442.gamechangers.doorlockcodegenerator.ui.signup.SignupActivity;
+import com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.AuthResult;
+import com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.signup.SignupActivity;
 
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         final EditText emailEditText = findViewById(R.id.login_email);
         final EditText passwordEditText = findViewById(R.id.login_password);
         final Button loginButton = findViewById(R.id.login_submit);
-        final ProgressBar loadingProgressBar = findViewById(R.id.loading);
+        final ProgressBar loadingProgressBar = findViewById(R.id.login_loading);
         final Button signupButton = findViewById(R.id.login_signup);
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
@@ -54,9 +55,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        loginViewModel.getLoginResult().observe(this, new Observer<LoginResult>() {
+        loginViewModel.getLoginResult().observe(this, new Observer<AuthResult>() {
             @Override
-            public void onChanged(LoginResult loginResult) {
+            public void onChanged(AuthResult loginResult) {
                 if (loginResult == null) {
                     return;
                 }

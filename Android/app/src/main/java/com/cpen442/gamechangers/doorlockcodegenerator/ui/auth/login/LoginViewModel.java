@@ -1,41 +1,42 @@
-package com.cpen442.gamechangers.doorlockcodegenerator.ui.login;
+package com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.login;
 
 import android.util.Patterns;
+
+import com.cpen442.gamechangers.doorlockcodegenerator.R;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.AuthRepository;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.Result;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.LoggedInUser;
+import com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.AuthResult;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.cpen442.gamechangers.doorlockcodegenerator.R;
-import com.cpen442.gamechangers.doorlockcodegenerator.data.LoginRepository;
-import com.cpen442.gamechangers.doorlockcodegenerator.data.Result;
-import com.cpen442.gamechangers.doorlockcodegenerator.data.model.LoggedInUser;
-
 class LoginViewModel extends ViewModel {
 
     private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
-    private LoginRepository loginRepository;
+    private MutableLiveData<AuthResult> loginResult = new MutableLiveData<>();
+    private AuthRepository authRepository;
 
-    LoginViewModel(LoginRepository loginRepository) {
-        this.loginRepository = loginRepository;
+    LoginViewModel(AuthRepository authRepository) {
+        this.authRepository = authRepository;
     }
 
     public MutableLiveData<LoginFormState> getLoginFormState() {
         return loginFormState;
     }
 
-    public MutableLiveData<LoginResult> getLoginResult() {
+    public MutableLiveData<AuthResult> getLoginResult() {
         return loginResult;
     }
 
     public void login(String email, String password) {
         // can be launched in a separate asynchronous job
-        Result<LoggedInUser> result = loginRepository.login(email, password);
+        Result<LoggedInUser> result = authRepository.login(email, password);
         if (result instanceof Result.Success) {
             LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-            loginResult.setValue(new LoginResult(true));
+            loginResult.setValue(new AuthResult(true));
         } else {
-            loginResult.setValue(new LoginResult(R.string.login_failed));
+            loginResult.setValue(new AuthResult(R.string.login_failed));
         }
     }
 

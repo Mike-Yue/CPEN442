@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".ui.login.LoginActivity">
+    tools:context=".ui.auth.login.LoginActivity">
 
     <EditText
         android:id="@+id/login_email"
@@ -50,7 +50,7 @@
         tools:text="Login" />
 
     <ProgressBar
-        android:id="@+id/loading"
+        android:id="@+id/login_loading"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

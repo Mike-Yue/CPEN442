@@ -1,27 +1,27 @@
-package com.cpen442.gamechangers.doorlockcodegenerator.ui.login;
+package com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.signup;
 
 
 
 import androidx.annotation.Nullable;
 
 /**
- * Data validation state of the login form.
+ * Data validation state of the Signup form.
  */
 
-class LoginFormState {
+class SignupFormState {
     @Nullable
     private Integer emailError;
     @Nullable
     private Integer passwordError;
     private boolean isDataValid;
 
-    LoginFormState(@Nullable Integer emailError, @Nullable Integer passwordError) {
+    SignupFormState(@Nullable Integer emailError, @Nullable Integer passwordError) {
         this.emailError = emailError;
         this.passwordError = passwordError;
         this.isDataValid = false;
     }
 
-    LoginFormState(boolean isDataValid) {
+    SignupFormState(boolean isDataValid) {
         this.emailError = null;
         this.passwordError = null;
         this.isDataValid = isDataValid;

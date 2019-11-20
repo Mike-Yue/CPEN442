@@ -1,7 +1,7 @@
-package com.cpen442.gamechangers.doorlockcodegenerator.ui.login;
+package com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.login;
 
-import com.cpen442.gamechangers.doorlockcodegenerator.data.LoginDataSource;
-import com.cpen442.gamechangers.doorlockcodegenerator.data.LoginRepository;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.AuthDataSource;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.AuthRepository;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
@@ -17,7 +17,7 @@ class LoginViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(LoginViewModel.class)) {
-            return (T) new LoginViewModel(LoginRepository.getInstance(new LoginDataSource()));
+            return (T) new LoginViewModel(AuthRepository.getInstance(new AuthDataSource()));
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }
