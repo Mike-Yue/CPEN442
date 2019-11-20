@@ -4,7 +4,7 @@ from api.models import Lock, Code
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from api.serializers import UserSerializerRead, UserSerializerWrite, LockSerializer, LockSerializerCreate, CodeSerializer
-from api.permissions import IsMasterUserOnly
+from api.permissions import IsMasterUserOnly, CreateUserAllowed
 
 class UserViewSet(viewsets.ModelViewSet):
     """
