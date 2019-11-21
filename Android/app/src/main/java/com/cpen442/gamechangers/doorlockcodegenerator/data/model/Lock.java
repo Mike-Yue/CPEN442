@@ -4,6 +4,11 @@ public class Lock {
     private String id;
     private String display_name;
 
+    public Lock(String id, String display_name) {
+        this.id = id;
+        this.display_name = display_name;
+    }
+
     public String getId() {
         return id;
     }
