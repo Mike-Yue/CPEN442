@@ -66,15 +66,15 @@ def validate(request):
     if request == "GET":
         return Response({"message": "Hello, world!"})
     else:
-        user = request.user
         lock_id = request.data['lock_id']
         entry_code = request.data['code']
         try:
             target_code = Code.objects.get(code=int(entry_code))
-            print(lock_id, entry_code)
             target_lock = Lock.objects.get(lock_id=lock_id)
         except:
             return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
-        if user in target_lock.users.all() and target_code.lock == target_lock:
+        if target_code.lock == target_lock and not target_code.expired:
+            target_code.expired = True
+            target_code.save()
             return Response({"Message": "Code is valid"}, status=status.HTTP_200_OK)
         return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
