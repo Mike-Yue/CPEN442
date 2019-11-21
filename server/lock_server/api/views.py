@@ -1,10 +1,12 @@
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import HttpResponseForbidden, HttpResponse
 from api.models import Lock, Code
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from api.serializers import UserSerializerRead, UserSerializerWrite, LockSerializer, LockSerializerCreate, CodeSerializer
-from api.permissions import IsMasterUserOnly
+from api.permissions import IsMasterUserOnly, CodePermission
+from django_filters import rest_framework as filters
+from api.filters import CodeFilter
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -40,5 +42,17 @@ class LockViewSet(viewsets.ModelViewSet):
         return Lock.objects.filter(users__id=user.id)
 
 class CodeViewSet(viewsets.ModelViewSet):
-    queryset = Code.objects.all()
+    permission_classes = (IsAuthenticated, CodePermission)
     serializer_class = CodeSerializer
+    filter_class = CodeFilter
+
+    def get_queryset(self):
+        user = self.request.user
+        lock_id = self.request.query_params['lock_id']
+        entry_code = self.request.query_params['code']
+        target_code = Code.objects.get(code=int(entry_code))
+        target_lock = Lock.objects.get(lock_id=lock_id)
+        if user in target_lock.users.all() and target_code.lock == target_lock:
+            return Code.objects.filter(id=target_code.id)
+        else:
+            return Code.objects.none()

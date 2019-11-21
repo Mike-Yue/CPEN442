@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from django.contrib.auth.models import User
+from api.models import Code, Lock
 
 class IsMasterUserOnly(permissions.BasePermission):
     """
@@ -12,3 +13,22 @@ class IsMasterUserOnly(permissions.BasePermission):
             return str(obj.master_user) == str(request.user)
         else:
             return request.user in obj.users.all()
+
+class CodePermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method == "GET":
+            user = request.user
+            if 'lock_id' not in request.query_params.keys() or 'code' not in request.query_params.keys():
+                return False
+            lock_id = request.query_params['lock_id']
+            entry_code = request.query_params['code']
+            try:
+                target_code = Code.objects.get(code=int(entry_code))
+                target_lock = Lock.objects.get(lock_id=lock_id)
+            except:
+                return False
+            if user in target_lock.users.all() and target_code.lock == target_lock:
+                return True
+            else:
+                return False
