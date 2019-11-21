@@ -4,12 +4,41 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:scrollbars="vertical"
+    android:scrollbars="none"
+    android:orientation="vertical"
     tools:context=".ui.main.MainActivity">
 
-    <RelativeLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="56dp"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:menu="@menu/toolbar"
+        app:title="Select Lock"
+
+        android:background="@color/colorAccentLight"
+        android:elevation="8dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        android:padding="@dimen/button_margin"
+
+        android:background="@color/colorPrimary">
 
         <TextView
             android:id="@+id/code_label"
@@ -17,12 +46,15 @@
             android:layout_height="92dp"
             android:layout_margin="@dimen/button_margin"
 
-            android:autoSizeTextType="uniform"
             android:autoSizeMaxTextSize="64sp"
             android:autoSizeMinTextSize="24sp"
+            android:autoSizeTextType="uniform"
 
-            android:textAlignment="center"
+            android:background="@color/colorPrimaryDark"
+            android:elevation="8dp"
+
             android:text="[ LOCKED ]"
+            android:textAlignment="center"
 
             tools:targetApi="o" />
 
@@ -35,22 +67,23 @@
             android:layout_marginStart="@dimen/button_margin"
             android:layout_marginEnd="@dimen/button_margin"
 
-            android:textAlignment="center"
+            android:text="Generate a code to unlock"
 
-            android:text="Generate a code to unlock" />
+            android:textAlignment="center" />
 
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
 
-            android:src="@drawable/ic_lock_locked"
             android:layout_above="@id/last_opened_label"
             android:layout_below="@id/time_remaining_label"
             android:layout_centerInParent="true"
-
             android:layout_margin="36dp"
-            />
+
+            android:src="@drawable/ic_lock_locked"
+
+            android:tint="@color/colorPrimaryDark" />
 
         <TextView
             android:id="@+id/last_opened_label"
@@ -60,37 +93,51 @@
             android:layout_above="@id/guest_code_button"
             android:layout_margin="@dimen/button_margin"
 
-            android:textAlignment="center"
+            android:text="Lock last opened: PLACEHOLDER"
 
-            android:text="Lock last opened: PLACEHOLDER" />
+            android:textAlignment="center" />
 
         <Button
             android:id="@+id/guest_code_button"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-
-            android:layout_marginStart="@dimen/button_margin"
-            android:layout_marginEnd="@dimen/button_margin"
-            android:layout_marginTop="0dp"
-            android:layout_marginBottom="2dp"
+            android:layout_height="54dp"
 
             android:layout_above="@id/unlock_now_button"
+            android:layout_marginStart="@dimen/button_margin"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="@dimen/button_margin"
 
-            android:text="Generate Guest Code"/>
+            android:background="@drawable/outline_button_bg"
+            android:elevation="8dp"
+
+            android:layout_marginBottom="2dp"
+
+            android:autoSizeMaxTextSize="22sp"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeTextType="uniform"
+
+            android:text="Generate Guest Code" />
 
         <Button
             android:id="@+id/unlock_now_button"
             android:layout_width="match_parent"
             android:layout_height="108dp"
 
+            android:background="@drawable/outline_button_bg"
+
             android:layout_alignParentBottom="true"
+            android:elevation="8dp"
+
+            android:autoSizeMaxTextSize="48sp"
+            android:autoSizeMinTextSize="14sp"
+            android:autoSizeTextType="uniform"
 
             android:layout_marginStart="@dimen/button_margin"
-            android:layout_marginEnd="@dimen/button_margin"
             android:layout_marginTop="2dp"
+            android:layout_marginEnd="@dimen/button_margin"
             android:layout_marginBottom="@dimen/button_margin"
 
-            android:text="Unlock Now"/>
+            android:text="Unlock Now" />
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
