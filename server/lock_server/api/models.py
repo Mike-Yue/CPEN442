@@ -27,8 +27,8 @@ class Lock(models.Model):
 
 class Code(models.Model):
 
-    def __str(self):
-        return self.code
+    def __str__(self):
+        return str(self.code)
 
     code = models.IntegerField()
 
@@ -38,8 +38,6 @@ class Code(models.Model):
         null=False,
     )
 
-    expiry_time = models.DateTimeField()
-
-    expired = models.BooleanField(
-        default=False
+    expiry_time = models.DateTimeField(
+        null=True,
     )
