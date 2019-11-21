@@ -7,6 +7,9 @@ from api.serializers import UserSerializerRead, UserSerializerWrite, LockSeriali
 from api.permissions import IsMasterUserOnly, CodePermission
 from django_filters import rest_framework as filters
 from api.filters import CodeFilter
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -56,3 +59,22 @@ class CodeViewSet(viewsets.ModelViewSet):
             return Code.objects.filter(id=target_code.id)
         else:
             return Code.objects.none()
+
+
+@api_view(['GET', 'POST'])
+def validate(request):
+    if request == "GET":
+        return Response({"message": "Hello, world!"})
+    else:
+        user = request.user
+        lock_id = request.data['lock_id']
+        entry_code = request.data['code']
+        try:
+            target_code = Code.objects.get(code=int(entry_code))
+            print(lock_id, entry_code)
+            target_lock = Lock.objects.get(lock_id=lock_id)
+        except:
+            return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        if user in target_lock.users.all() and target_code.lock == target_lock:
+            return Response({"Message": "Code is valid"}, status=status.HTTP_200_OK)
+        return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
