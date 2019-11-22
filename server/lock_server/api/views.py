@@ -4,13 +4,14 @@ from api.models import Lock, Code
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from api.serializers import UserSerializerRead, UserSerializerWrite, LockSerializer, LockSerializerCreate, CodeSerializer
-from api.permissions import IsMasterUserOnly, CodePermission
+from api.permissions import IsMasterUserOnly
 from django_filters import rest_framework as filters
 from api.filters import CodeFilter
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 import secrets
+import datetime
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -31,7 +32,7 @@ class LockViewSet(viewsets.ModelViewSet):
     API endpoint that allows groups to be viewed or edited.
     """
 
-    permission_classes = (IsMasterUserOnly, IsAuthenticated)
+    permission_classes = (IsAuthenticated, IsMasterUserOnly)
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -50,14 +51,11 @@ class LockViewSet(viewsets.ModelViewSet):
 def createCode(request):
     try:
         target_lock = Lock.objects.get(lock_id=request.data['lock_id'])
-        print(target_lock)
         if request.user in target_lock.users.all():
             #Need to implement custom expiry time
             code_generator = secrets.SystemRandom()
             code = code_generator.randint(0,9999)
-            print(code)
-            temp = Code.objects.create(code=code, lock=target_lock)
-            print(temp)
+            temp = Code.objects.create(code=code, lock=target_lock, expiry_time=request.data['expiry_time'])
             return Response({"Message": "Your code is: {}".format(str(code).zfill(4))}, status=status.HTTP_200_OK)
     except:
         return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)

@@ -1,5 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+import datetime
+
+def validate_date(expiry_time):
+    if expiry_time < datetime.datetime.now(datetime.timezone.utc):
+        raise ValidationError("Expiry Time cannot be in the past!")
+
 class Lock(models.Model):
 
     def __str__(self):
@@ -40,4 +47,5 @@ class Code(models.Model):
 
     expiry_time = models.DateTimeField(
         null=True,
+        validators=[validate_date]
     )
