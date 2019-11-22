@@ -25,7 +25,7 @@ SECRET_KEY = 'lb$-)_n0oj0l=#fibb_xc=)1&s+fguk)mrp-lj7&5pg7m#z$en'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
