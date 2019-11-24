@@ -67,7 +67,7 @@
             android:layout_marginStart="@dimen/button_margin"
             android:layout_marginEnd="@dimen/button_margin"
 
-            android:text="Generate a code to unlock"
+            android:text="@string/time_remaining_idle_text"
 
             android:textAlignment="center" />
 
@@ -123,7 +123,7 @@
             android:layout_width="match_parent"
             android:layout_height="108dp"
 
-            android:background="@drawable/outline_button_bg"
+            android:background="@color/colorAccentLight"
 
             android:layout_alignParentBottom="true"
             android:elevation="8dp"
