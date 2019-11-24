@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        loginViewModel.getLoginResult().observe(this, new Observer<AuthResult>() {
+        loginViewModel.getAuthResult().observe(this, new Observer<AuthResult>() {
             @Override
             public void onChanged(AuthResult loginResult) {
                 if (loginResult == null) {

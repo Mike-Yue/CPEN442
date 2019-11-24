@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
 
 import com.cpen442.gamechangers.doorlockcodegenerator.R;
 
@@ -24,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.time_remaining_label)
     TextView mTimeRemainingText;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +34,13 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
 
+
+    }
+
+    public void showAddLockDialog() {
+        // Create an instance of the dialog fragment and show it
+        DialogFragment dialogFragment = new AddLockDiaLogFragment();
+        dialogFragment.show(getSupportFragmentManager(), "addLockDialog");
 
     }
 

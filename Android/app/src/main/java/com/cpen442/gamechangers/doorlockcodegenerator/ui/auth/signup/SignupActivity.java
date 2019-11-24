@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cpen442.gamechangers.doorlockcodegenerator.R;
+import com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.login.LoginActivity;
 import com.cpen442.gamechangers.doorlockcodegenerator.ui.main.MainActivity;
 import com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.AuthResult;
 
@@ -36,10 +37,6 @@ public class SignupActivity extends AppCompatActivity {
 
         final EditText emailEditText = findViewById(R.id.signup_email);
         final EditText passwordEditText = findViewById(R.id.signup_password);
-        final EditText lastNameEditText = findViewById(R.id.signup_lastName);
-        final EditText firstNameEditText = findViewById(R.id.signup_firstName);
-        final EditText serialNumEditText = findViewById(R.id.signup_serialNumber);
-        final EditText displayNameEditText = findViewById(R.id.signup_displayName);
         final Button submit_button = findViewById(R.id.signup_submit);
         final ProgressBar loadingProgressBar = findViewById(R.id.signup_loading);
 
@@ -102,11 +99,8 @@ public class SignupActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 signupViewModel.signup(
                         emailEditText.getText().toString(),
-                        passwordEditText.getText().toString(),
-                        serialNumEditText.getText().toString(),
-                        lastNameEditText.getText().toString(),
-                        firstNameEditText.getText().toString(),
-                        displayNameEditText.getText().toString());
+                        passwordEditText.getText().toString()
+                );
             }
         });
 
@@ -116,7 +110,7 @@ public class SignupActivity extends AppCompatActivity {
         String welcome = "Welcome !";
         // TODO : initiate successful logged in experience
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+        startActivity(new Intent(getApplicationContext(), LoginActivity.class));
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {

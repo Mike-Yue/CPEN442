@@ -29,17 +29,9 @@ class SignupViewModel extends ViewModel {
         return authResult;
     }
 
-    public void signup(String email, String password, String serial_number, String first_name,
-                       String last_name, String display_name) {
-        // can be launched in a separate asynchronous job
-        Result<LoggedInUser> result = authRepository.signup(email, password, serial_number,
-                first_name, last_name, display_name);
-        if (result instanceof Result.Success) {
-            LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-            authResult.setValue(new AuthResult(true));
-        } else {
-            authResult.setValue(new AuthResult(R.string.login_failed));
-        }
+    public void signup(String email, String password) {
+        // can be launched in a separate thread
+        new Thread(new SignUpTask(email, password)).start();
     }
 
     public void signUpDataChanged(String email, String password) {
@@ -63,5 +55,26 @@ class SignupViewModel extends ViewModel {
     // A placeholder password validation check
     private boolean isPasswordValid(String password) {
         return password != null && password.trim().length() > 5;
+    }
+
+    private class SignUpTask implements Runnable {
+        private String email;
+        private String password;
+
+        public SignUpTask(String email, String password) {
+            this.email = email;
+            this.password = password;
+        }
+
+        @Override
+        public void run() {
+            Result<LoggedInUser> result = authRepository.signup(email, password);
+            if (result instanceof Result.Success) {
+                LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
+                authResult.postValue(new AuthResult(true));
+            } else {
+                authResult.postValue(new AuthResult(R.string.login_failed));
+            }
+        }
     }
 }

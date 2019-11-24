@@ -1,6 +1,5 @@
 package com.cpen442.gamechangers.doorlockcodegenerator.ui.auth.signup;
 
-import com.cpen442.gamechangers.doorlockcodegenerator.data.AuthDataSource;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.AuthRepository;
 
 import androidx.annotation.NonNull;
@@ -17,7 +16,7 @@ class SignupViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(SignupViewModel.class)) {
-            return (T) new SignupViewModel(AuthRepository.getInstance(new AuthDataSource()));
+            return (T) new SignupViewModel(AuthRepository.getInstance());
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

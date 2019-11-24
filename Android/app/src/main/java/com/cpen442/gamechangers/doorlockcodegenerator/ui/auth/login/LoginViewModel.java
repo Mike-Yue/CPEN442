@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModel;
 class LoginViewModel extends ViewModel {
 
     private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<AuthResult> loginResult = new MutableLiveData<>();
+    private MutableLiveData<AuthResult> authResult = new MutableLiveData<>();
     private AuthRepository authRepository;
 
     LoginViewModel(AuthRepository authRepository) {
@@ -25,19 +25,13 @@ class LoginViewModel extends ViewModel {
         return loginFormState;
     }
 
-    public MutableLiveData<AuthResult> getLoginResult() {
-        return loginResult;
+    public MutableLiveData<AuthResult> getAuthResult() {
+        return authResult;
     }
 
     public void login(String email, String password) {
         // can be launched in a separate asynchronous job
-        Result<LoggedInUser> result = authRepository.login(email, password);
-        if (result instanceof Result.Success) {
-            LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-            loginResult.setValue(new AuthResult(true));
-        } else {
-            loginResult.setValue(new AuthResult(R.string.login_failed));
-        }
+        new Thread(new LoginTask(email, password)).start();
     }
 
     public void loginDataChanged(String email, String password) {
@@ -61,5 +55,26 @@ class LoginViewModel extends ViewModel {
     // A placeholder password validation check
     private boolean isPasswordValid(String password) {
         return password != null && password.trim().length() > 5;
+    }
+
+    private class LoginTask implements Runnable {
+        private String email;
+        private String password;
+
+        public LoginTask(String email, String password) {
+            this.email = email;
+            this.password = password;
+        }
+
+        @Override
+        public void run() {
+            Result<LoggedInUser> result = authRepository.login(email, password);
+            if (result instanceof Result.Success) {
+                LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
+                authResult.postValue(new AuthResult(true));
+            } else {
+                authResult.postValue(new AuthResult(R.string.login_failed));
+            }
+        }
     }
 }

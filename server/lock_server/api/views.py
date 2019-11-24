@@ -4,12 +4,14 @@ from api.models import Lock, Code
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from api.serializers import UserSerializerRead, UserSerializerWrite, LockSerializer, LockSerializerCreate, CodeSerializer
-from api.permissions import IsMasterUserOnly, CodePermission
+from api.permissions import IsMasterUserOnly
 from django_filters import rest_framework as filters
 from api.filters import CodeFilter
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+import secrets
+import datetime
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -30,7 +32,7 @@ class LockViewSet(viewsets.ModelViewSet):
     API endpoint that allows groups to be viewed or edited.
     """
 
-    permission_classes = (IsMasterUserOnly, IsAuthenticated)
+    permission_classes = (IsAuthenticated, IsMasterUserOnly)
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -44,22 +46,19 @@ class LockViewSet(viewsets.ModelViewSet):
         user = self.request.user
         return Lock.objects.filter(users__id=user.id)
 
-class CodeViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, CodePermission)
-    serializer_class = CodeSerializer
-    filter_class = CodeFilter
-
-    def get_queryset(self):
-        user = self.request.user
-        lock_id = self.request.query_params['lock_id']
-        entry_code = self.request.query_params['code']
-        target_code = Code.objects.get(code=int(entry_code))
-        target_lock = Lock.objects.get(lock_id=lock_id)
-        if user in target_lock.users.all() and target_code.lock == target_lock:
-            return Code.objects.filter(id=target_code.id)
-        else:
-            return Code.objects.none()
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def createCode(request):
+    try:
+        target_lock = Lock.objects.get(lock_id=request.data['lock_id'])
+        if request.user in target_lock.users.all():
+            #Need to implement custom expiry time
+            code_generator = secrets.SystemRandom()
+            code = code_generator.randint(0,9999)
+            temp = Code.objects.create(code=code, lock=target_lock, expiry_time=request.data['expiry_time'])
+            return Response({"Message": "Your code is: {}".format(str(code).zfill(4))}, status=status.HTTP_200_OK)
+    except:
+        return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
 @api_view(['GET', 'POST'])
 def validate(request):
@@ -73,8 +72,7 @@ def validate(request):
             target_lock = Lock.objects.get(lock_id=lock_id)
         except:
             return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
-        if target_code.lock == target_lock and not target_code.expired:
-            target_code.expired = True
-            target_code.save()
+        if target_code.lock == target_lock:
+            target_code.delete()
             return Response({"Message": "Code is valid"}, status=status.HTTP_200_OK)
         return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
