@@ -14,7 +14,6 @@ public interface AuthService {
     @POST("login")
     Call<LoggedInUser> login(@Body LoginRequest loginRequest);
 
-    @POST("users")
-    Call<LoggedInUser> signup(@Body SignupRequest signupRequest);
-
+    @POST("users/")
+    Call<Void> signup(@Body SignupRequest signupRequest);
 }

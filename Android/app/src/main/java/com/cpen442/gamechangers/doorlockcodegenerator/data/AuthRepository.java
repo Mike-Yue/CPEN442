@@ -2,6 +2,16 @@ package com.cpen442.gamechangers.doorlockcodegenerator.data;
 
 
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.LoggedInUser;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.LoginRequest;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.SignupRequest;
+import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.AuthService;
+import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.RetrofitClient;
+
+import java.io.IOException;
+
+import okhttp3.internal.http.HttpCodec;
+import okhttp3.internal.http1.Http1Codec;
+import retrofit2.Response;
 
 /**
  * Class that requests authentication and user information from the remote data source and
@@ -12,20 +22,20 @@ public class AuthRepository {
 
     private static volatile AuthRepository instance;
 
-    private AuthDataSource dataSource;
+    private AuthService authService;
 
     // If user credentials will be cached in local storage, it is recommended it be encrypted
     // @see https://developer.android.com/training/articles/keystore
     private LoggedInUser user = null;
 
     //private constructor : singleton access
-    private AuthRepository(AuthDataSource dataSource) {
-        this.dataSource = dataSource;
+    private AuthRepository() {
+        authService = RetrofitClient.getRetrofitInstance().create(AuthService.class);
     }
 
-    public static AuthRepository getInstance(AuthDataSource dataSource) {
+    public static AuthRepository getInstance() {
         if (instance == null) {
-            instance = new AuthRepository(dataSource);
+            instance = new AuthRepository();
         }
         return instance;
     }
@@ -36,7 +46,6 @@ public class AuthRepository {
 
     public void logout() {
         user = null;
-        dataSource.logout();
     }
 
     private void setLoggedInUser(LoggedInUser user) {
@@ -45,24 +54,36 @@ public class AuthRepository {
         // @see https://developer.android.com/training/articles/keystore
     }
 
-    public Result<LoggedInUser> login(String username, String password) {
-        Result<LoggedInUser> result = dataSource.login(username, password);
-        if (result instanceof Result.Success) {
-            setLoggedInUser(((Result.Success<LoggedInUser>) result).getData());
+    public Result<LoggedInUser> login(String email, String password) {
+        try {
+            Response<LoggedInUser> response = authService.login(new LoginRequest(email, password))
+                    .execute();
+            if (response.code() != 200) {
+                return new Result.Error("Cannot create new users.");
+            } else {
+                LoggedInUser user = response.body();
+                setLoggedInUser(user);
+                return new Result.Success<LoggedInUser>(user);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result.Error(e.getMessage());
         }
-        return result;
     }
 
-    public Result<LoggedInUser> signup(String email, String password, String serial_number,
-                                       String last_name, String first_name, String display_name)  {
-        Result<LoggedInUser> result = dataSource.signup(email, password, serial_number, last_name,
-                first_name, display_name);
-        if (result instanceof Result.Success) {
-            setLoggedInUser(((Result.Success<LoggedInUser>) result).getData());
+    public Result signup(String email, String password)  {
+        try {
+            Response response = authService.signup(new SignupRequest(email, password))
+                    .execute();
+            if (response.code() != 201) {
+                return new Result.Error("Cannot create new users.");
+            } else {
+                return new Result.Success<>(null);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result.Error(e.getMessage());
         }
-        return result;
     }
-
-
 
 }

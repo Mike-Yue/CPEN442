@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     lockListAdapter.addLock(newLock);
                 } else if (result instanceof Result.Error) {
                     Toast.makeText(getApplicationContext(),
-                            ((Result.Error) result).getError().getMessage(),
+                            ((Result.Error) result).getError(),
                             Toast.LENGTH_LONG).show();
                 }
             }
