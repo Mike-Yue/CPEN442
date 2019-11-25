@@ -15,6 +15,7 @@ public class MainActivityViewModel extends ViewModel {
     private AuthRepository authRepository;
     private MutableLiveData<Result<Lock>> addLockResult = new MutableLiveData<>();
     private MutableLiveData<Result<List<Lock>>> fetchLocksResult = new MutableLiveData<>();
+    private MutableLiveData<Result<String>> createCodeResult = new MutableLiveData<>();
     private LockRepository lockRepository;
 
     public MutableLiveData<Result<List<Lock>>> getFetchLocksResult() {
@@ -38,6 +39,14 @@ public class MainActivityViewModel extends ViewModel {
         new Thread(new FetchLocksTask()).start();
     }
 
+    public void createCode(String lock_id, String expiry_time) {
+        new Thread(new CreateCodeTask(lock_id, expiry_time)).start();
+    }
+
+    public MutableLiveData<Result<String>> getCreateCodeResult() {
+        return createCodeResult;
+    }
+
     private class AddLockTask implements Runnable {
         private String serial_number;
         private String display_name;
@@ -49,7 +58,8 @@ public class MainActivityViewModel extends ViewModel {
 
         @Override
         public void run() {
-            Result<Lock> result = lockRepository.addLock(authRepository.getToken(), serial_number, display_name);
+            String token = "Token " + authRepository.getToken();
+            Result<Lock> result = lockRepository.addLock(token, serial_number, display_name);
             addLockResult.postValue(result);
         }
     }
@@ -57,8 +67,26 @@ public class MainActivityViewModel extends ViewModel {
     private class FetchLocksTask implements Runnable {
         @Override
         public void run() {
-            Result<List<Lock>> result = lockRepository.getLocks(authRepository.getToken());
+            String token = "Token " + authRepository.getToken();
+            Result<List<Lock>> result = lockRepository.getLocks(token);
             fetchLocksResult.postValue(result);
+        }
+    }
+
+    private class CreateCodeTask implements Runnable {
+        private String lock_id;
+        private String expiry_time;
+
+        public CreateCodeTask(String lock_id, String expiry_time) {
+            this.lock_id = lock_id;
+            this.expiry_time = expiry_time;
+        }
+
+        @Override
+        public void run() {
+            String token = "Token " + authRepository.getToken();
+            Result<String> result = lockRepository.createCode(token, lock_id, expiry_time);
+            createCodeResult.postValue(result);
         }
     }
 }

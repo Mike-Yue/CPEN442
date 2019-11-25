@@ -1,5 +1,7 @@
 package com.cpen442.gamechangers.doorlockcodegenerator.data;
 
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.CreateCodeRequest;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.CreateCodeResponse;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.GetLockersResponse;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.LockService;
@@ -35,7 +37,7 @@ public class LockRepository {
         try {
             Response<GetLockersResponse> response = lockService.getLocks(token).execute();
             if (response.code() == 200) {
-                locks = response.body().getResult();
+                locks = response.body().getResults();
                 return new Result.Success<>(locks);
             } else {
                 return new Result.Error("Cannot fetch the lock list");
@@ -50,7 +52,7 @@ public class LockRepository {
         Lock newLock = new Lock(serial_number, display_name);
         try {
             Response<Void> response = lockService.addLock(token, newLock).execute();
-            if (response.code() == 201) {
+            if (response.code() == 200) {
                 locks.add(newLock);
                 return new Result.Success<>(newLock);
             } else {
@@ -59,6 +61,21 @@ public class LockRepository {
         } catch (IOException e) {
             e.printStackTrace();
             return new Result.Error("Failed to create the lock");
+        }
+    }
+
+    public Result<String> createCode(String token, String lock_id, String expiry_time) {
+        try {
+            Response<CreateCodeResponse> response = lockService.createCode(token,
+                    new CreateCodeRequest(lock_id, expiry_time)).execute();
+            if (response.code() == 200) {
+                return new Result.Success<String>(response.body().getMessage());
+            } else {
+                return new Result.Error("Failed to create the code");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result.Error("Failed to create the code");
         }
     }
 }

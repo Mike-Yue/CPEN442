@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        lockListAdapter = new LockListAdapter();
-        recyclerView.setAdapter(lockListAdapter);
+//        lockListAdapter = new LockListAdapter();
+//        recyclerView.setAdapter(lockListAdapter);
 
         addLockFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
             public void onChanged(Result<List<Lock>> result) {
                 if (result instanceof Result.Success) {
                     List<Lock> locks = ((Result.Success<List<Lock>>) result).getData();
-                    lockListAdapter.fetchLocks(locks);
+                    lockListAdapter = new LockListAdapter(locks);
+                    recyclerView.setAdapter(lockListAdapter);
                 } else if (result instanceof Result.Error) {
                     Toast.makeText(getApplicationContext(),
                             ((Result.Error) result).getError(),
@@ -83,8 +84,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(Result<Lock> result) {
                 if (result instanceof Result.Success) {
-                    Lock newLock = ((Result.Success<Lock>) result).getData();
-                    lockListAdapter.addLock(newLock);
+                    lockListAdapter.notifyDataSetChanged();
                 } else if (result instanceof Result.Error) {
                     Toast.makeText(getApplicationContext(),
                             ((Result.Error) result).getError(),
@@ -92,6 +92,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        mainActivityViewModel.getCreateCodeResult().observe(this, new Observer<Result<String>>() {
+            @Override
+            public void onChanged(Result<String> result) {
+                if (result instanceof Result.Success) {
+                    System.out.println(((Result.Success<String>) result).getData());
+                } else if (result instanceof Result.Error) {
+                    Toast.makeText(getApplicationContext(),
+                            ((Result.Error) result).getError(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mainActivityViewModel.getLocks();
+        mainActivityViewModel.createCode("123456", "2019-11-29 14:56:27-08:00");
     }
 
     public void showAddLockDialog() {
