@@ -6,6 +6,9 @@ import com.cpen442.gamechangers.doorlockcodegenerator.data.Result;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -29,7 +32,7 @@ public class MainActivityViewModel extends ViewModel {
         addLockResult.setValue(result);
     }
 
-    public List<Lock> getLocks() {
-        return lockRepository.getLocks();
+    public List<Lock> getLocks(int timeout) throws ExecutionException, InterruptedException, TimeoutException {
+        return lockRepository.getLocks().get(timeout, TimeUnit.MILLISECONDS);
     }
 }

@@ -4,26 +4,29 @@ import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
-public class LockRepository {
+public enum LockRepository {
+    INSTANCE(new ArrayList<Lock>());
 
     private static volatile LockRepository instance;
 
     private List<Lock> locks;
 
-    private LockRepository(List<Lock> locks) {
+    LockRepository(List<Lock> locks) {
         this.locks = locks;
     }
 
-    public static LockRepository getInstance() {
-        if (instance == null) {
-            instance = new LockRepository(new ArrayList<Lock>());
-        }
-        return instance;
-    }
+//    public static LockRepository getInstance() {
+//        if (instance == null) {
+//            instance = new LockRepository(new ArrayList<Lock>());
+//        }
+//        return instance;
+//    }
 
-    public List<Lock> getLocks() {
-        return locks;
+    public Future<List<Lock>> getLocks() {
+//        return locks;
+        return null;
     }
 
     public Result<Lock> addLock(String serial_number, String display_name) {

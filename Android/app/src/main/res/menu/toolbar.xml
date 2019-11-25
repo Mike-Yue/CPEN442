@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="select_lock"
+        android:id="@+id/select_lock"
         android:title="Select Lock"
         app:showAsAction="always"
         android:orderInCategory="1"
         app:actionViewClass="android.widget.Spinner"/>
 
     <item
-        android:id="show_log"
+        android:id="@+id/show_log"
         app:showAsAction="always"
         android:icon="@drawable/ic_history_black_24dp"
         android:orderInCategory="2"/>
