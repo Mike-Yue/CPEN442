@@ -6,6 +6,25 @@ import java.util.List;
 
 public class GetLockersResponse {
 
-    @SerializedName("result")
-    private List<Lock> result;
+    @SerializedName("count")
+    private int count;
+
+    @SerializedName("results")
+    private List<Lock> results;
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public List<Lock> getResults() {
+        return results;
+    }
+
+    public void setResults(List<Lock> result) {
+        this.results = result;
+    }
 }

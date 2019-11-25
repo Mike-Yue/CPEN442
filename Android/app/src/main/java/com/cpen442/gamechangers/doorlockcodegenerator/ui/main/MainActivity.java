@@ -17,8 +17,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.Observer;
 
 import com.cpen442.gamechangers.doorlockcodegenerator.R;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.Result;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,13 +63,6 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO call populate locks dropdown with lock list
 
-
-    }
-
-    public void showAddLockDialog() {
-        // Create an instance of the dialog fragment and show it
-        DialogFragment dialogFragment = new AddLockDiaLogFragment();
-        dialogFragment.show(getSupportFragmentManager(), "addLockDialog");
 
     }
 
@@ -116,7 +112,33 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+//        mainActivityViewModel.getFetchLocksResult().observe(this,
+//                new Observer<Result<List<Lock>>>() {
+//            @Override
+//            public void onChanged(Result<List<Lock>> result) {
+//                if (result instanceof Result.Success) {
+//                    List<Lock> locks = ((Result.Success<List<Lock>>) result).getData();
+//                    lockListAdapter = new LockListAdapter(locks);
+//                    recyclerView.setAdapter(lockListAdapter);
+//                } else if (result instanceof Result.Error) {
+//                    Toast.makeText(getApplicationContext(),
+//                            ((Result.Error) result).getError(),
+//                            Toast.LENGTH_LONG).show();
+//                }
             }
+//        });
+//
+//        mainActivityViewModel.getAddLockResult().observe(this, new Observer<Result<Lock>>() {
+//            @Override
+//            public void onChanged(Result<Lock> result) {
+//                if (result instanceof Result.Success) {
+//                    lockListAdapter.notifyDataSetChanged();
+//                } else if (result instanceof Result.Error) {
+//                    Toast.makeText(getApplicationContext(),
+//                            ((Result.Error) result).getError(),
+//                            Toast.LENGTH_LONG).show();
+//                }
+//            }
         });
     }
 
@@ -135,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
 
 
     @OnClick(R.id.unlock_now_button)

@@ -8,7 +8,6 @@ import android.widget.TextView;
 import com.cpen442.gamechangers.doorlockcodegenerator.R;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -28,15 +27,16 @@ public class LockListAdapter extends RecyclerView.Adapter<LockListAdapter.LockIt
         }
     }
 
-    public LockListAdapter() {
+    public LockListAdapter(List<Lock> locks) {
         super();
-        this.locks = new ArrayList<>();
+        this.locks = locks;
     }
 
-    public void addLock(Lock lock) {
-        this.locks.add(lock);
-        notifyItemInserted(locks.size());
-    }
+//    public void addLock(Lock lock) {
+//        this.locks.add(lock);
+//        notifyItemInserted(locks.size());
+//    }
+
 
     @Override
     public LockListAdapter.LockItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -50,7 +50,7 @@ public class LockListAdapter extends RecyclerView.Adapter<LockListAdapter.LockIt
 
     @Override
     public void onBindViewHolder(@NonNull LockItemViewHolder holder, int position) {
-        holder.displayNameView.setText(locks.get(position).getDisplay_name());
+        holder.displayNameView.setText(locks.get(position).getId());
     }
 
     @Override

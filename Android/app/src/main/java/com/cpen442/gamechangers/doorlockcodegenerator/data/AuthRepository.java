@@ -8,9 +8,6 @@ import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.AuthService;
 import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.RetrofitClient;
 
 import java.io.IOException;
-
-import okhttp3.internal.http.HttpCodec;
-import okhttp3.internal.http1.Http1Codec;
 import retrofit2.Response;
 
 /**
@@ -46,6 +43,10 @@ public class AuthRepository {
 
     public void logout() {
         user = null;
+    }
+
+    public String getToken() {
+        return user.getAuth_token();
     }
 
     private void setLoggedInUser(LoggedInUser user) {

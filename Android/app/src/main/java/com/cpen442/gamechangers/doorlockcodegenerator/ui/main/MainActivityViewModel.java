@@ -5,6 +5,7 @@ import com.cpen442.gamechangers.doorlockcodegenerator.data.LockRepository;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.Result;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +17,13 @@ import androidx.lifecycle.ViewModel;
 public class MainActivityViewModel extends ViewModel {
     private AuthRepository authRepository;
     private MutableLiveData<Result<Lock>> addLockResult = new MutableLiveData<>();
+    private MutableLiveData<Result<List<Lock>>> fetchLocksResult = new MutableLiveData<>();
+    private MutableLiveData<Result<String>> createCodeResult = new MutableLiveData<>();
     private LockRepository lockRepository;
+
+    public MutableLiveData<Result<List<Lock>>> getFetchLocksResult() {
+        return fetchLocksResult;
+    }
 
     public MainActivityViewModel(AuthRepository authRepository, LockRepository lockRepository) {
         this.authRepository = authRepository;
@@ -28,11 +35,61 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void addLock(String serial_number, String display_name) {
-        Result<Lock> result = lockRepository.addLock(serial_number, display_name);
-        addLockResult.setValue(result);
+        new Thread(new AddLockTask(serial_number, display_name)).start();
     }
 
-    public List<Lock> getLocks(int timeout) throws ExecutionException, InterruptedException, TimeoutException {
-        return lockRepository.getLocks().get(timeout, TimeUnit.MILLISECONDS);
+    public void getLocks() {
+        new Thread(new FetchLocksTask()).start();
+    }
+
+    public void createCode(String lock_id, String expiry_time) {
+        new Thread(new CreateCodeTask(lock_id, expiry_time)).start();
+    }
+
+    public MutableLiveData<Result<String>> getCreateCodeResult() {
+        return createCodeResult;
+    }
+
+    private class AddLockTask implements Runnable {
+        private String serial_number;
+        private String display_name;
+
+        public AddLockTask(String serial_number, String display_name) {
+            this.serial_number = serial_number;
+            this.display_name = display_name;
+        }
+
+        @Override
+        public void run() {
+            String token = "Token " + authRepository.getToken();
+            Result<Lock> result = lockRepository.addLock(token, serial_number, display_name);
+            addLockResult.postValue(result);
+        }
+    }
+
+    private class FetchLocksTask implements Runnable {
+        @Override
+        public void run() {
+            String token = "Token " + authRepository.getToken();
+            Result<List<Lock>> result = lockRepository.getLocks(token);
+            fetchLocksResult.postValue(result);
+        }
+    }
+
+    private class CreateCodeTask implements Runnable {
+        private String lock_id;
+        private String expiry_time;
+
+        public CreateCodeTask(String lock_id, String expiry_time) {
+            this.lock_id = lock_id;
+            this.expiry_time = expiry_time;
+        }
+
+        @Override
+        public void run() {
+            String token = "Token " + authRepository.getToken();
+            Result<String> result = lockRepository.createCode(token, lock_id, expiry_time);
+            createCodeResult.postValue(result);
+        }
     }
 }
