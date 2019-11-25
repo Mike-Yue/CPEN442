@@ -93,9 +93,12 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(emailEditText.getText().toString(),
-                        passwordEditText.getText().toString());
+                //TODO only for testing
+                loginSucceeded();
+                // TODO TODO TODO
+//                loadingProgressBar.setVisibility(View.VISIBLE);
+//                loginViewModel.login(emailEditText.getText().toString(),
+//                        passwordEditText.getText().toString());
             }
         });
 
@@ -110,7 +113,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loginSucceeded() {
         String welcome = "Welcome !";
-        // TODO : initiate successful logged in experience
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
         startActivity(new Intent(getApplicationContext(), MainActivity.class));
     }

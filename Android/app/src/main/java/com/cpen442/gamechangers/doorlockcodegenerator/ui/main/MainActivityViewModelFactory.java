@@ -13,7 +13,7 @@ public class MainActivityViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(MainActivityViewModel.class)) {
             return (T) new MainActivityViewModel(AuthRepository.getInstance(),
-                    LockRepository.INSTANCE);
+                    LockRepository.getInstance());
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

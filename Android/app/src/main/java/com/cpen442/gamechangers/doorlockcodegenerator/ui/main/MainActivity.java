@@ -3,6 +3,7 @@ package com.cpen442.gamechangers.doorlockcodegenerator.ui.main;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,18 +19,25 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.cpen442.gamechangers.doorlockcodegenerator.R;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.LockRepository;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.Result;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.Result.Success;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,9 +55,13 @@ public class MainActivity extends AppCompatActivity {
     Spinner mLockSelect;
 
     @BindView(R.id.show_log)
-    Button mShowLog;
+    View mShowLog;
 
+    private String mToken;
     private Lock mSelectedLock = null;
+    private MainActivityViewModel mViewModel;
+    private List<Lock> mLocks;
+    private long nextCodeDuration = 0;
 
 
     @Override
@@ -61,9 +73,41 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
 
-        //TODO call populate locks dropdown with lock list
+        mViewModel = ViewModelProviders.of(this, new MainActivityViewModelFactory()).get(MainActivityViewModel.class);
+        setupCallbacks();
+    }
 
+    private void setupCallbacks() {
+        mViewModel.getFetchLocksResult().observe(this, result -> {
+            if (result instanceof Success) {
+                mLocks = ((Success<List<Lock>>) result).getData();
+                populateLocksDropdown(mLocks);
+            } else {
+                Toast.makeText(this, "Error fetching lock list", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mViewModel.getAddLockResult().observe(this, result -> {
+            if (result instanceof Success) {
+                Lock newLock = ((Success<Lock>) result).getData();
+                mLocks.add(newLock);
+                populateLocksDropdown(mLocks);
+            } else if (result instanceof Result.Error) {
+                Toast.makeText(getApplicationContext(),
+                        ((Result.Error) result).getError(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
 
+        mViewModel.getCreateCodeResult().observe(this, result -> {
+            if (result instanceof Success) {
+                String code = ((Success<String>) result).getData();
+                onCodeCreated(code);
+            } else if (result instanceof Result.Error) {
+                Toast.makeText(getApplicationContext(),
+                        ((Result.Error) result).getError(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /**
@@ -85,6 +129,14 @@ public class MainActivity extends AppCompatActivity {
                 mTimeRemainingText.setText(R.string.time_remaining_idle_text);
             }
         };
+    }
+
+    private void onCodeCreated(String code) {
+        mCodeText.setText(code);
+
+        countDownLock(nextCodeDuration);
+        nextCodeDuration = 0;
+
     }
 
     private void populateLocksDropdown(List<Lock> locks) {
@@ -111,38 +163,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-//        mainActivityViewModel.getFetchLocksResult().observe(this,
-//                new Observer<Result<List<Lock>>>() {
-//            @Override
-//            public void onChanged(Result<List<Lock>> result) {
-//                if (result instanceof Result.Success) {
-//                    List<Lock> locks = ((Result.Success<List<Lock>>) result).getData();
-//                    lockListAdapter = new LockListAdapter(locks);
-//                    recyclerView.setAdapter(lockListAdapter);
-//                } else if (result instanceof Result.Error) {
-//                    Toast.makeText(getApplicationContext(),
-//                            ((Result.Error) result).getError(),
-//                            Toast.LENGTH_LONG).show();
-//                }
-            }
-//        });
-//
-//        mainActivityViewModel.getAddLockResult().observe(this, new Observer<Result<Lock>>() {
-//            @Override
-//            public void onChanged(Result<Lock> result) {
-//                if (result instanceof Result.Success) {
-//                    lockListAdapter.notifyDataSetChanged();
-//                } else if (result instanceof Result.Error) {
-//                    Toast.makeText(getApplicationContext(),
-//                            ((Result.Error) result).getError(),
-//                            Toast.LENGTH_LONG).show();
-//                }
-//            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
 
     private void authenticate(BiometricPrompt.AuthenticationCallback callback) {
+        Handler handler = new Handler();
+        Executor executor = handler::post;
+
         BiometricManager biometricManager = BiometricManager.from(this);
         if(biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS){
             BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
@@ -150,11 +178,11 @@ public class MainActivity extends AppCompatActivity {
                     .setDescription("Authenticate with biometrics to generate an unlock code now.")
                     .setNegativeButtonText("Don't generate code now")
                     .build();
-            BiometricPrompt biometricPrompt = new BiometricPrompt(this, null, callback);
+            BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor, callback);
+            biometricPrompt.authenticate(promptInfo);
         } else {
             // No biometrics, give error message
             Toast.makeText(this, "Only phones with biometrics are currently supported", Toast.LENGTH_SHORT).show();
-
         }
     }
 
@@ -175,10 +203,18 @@ public class MainActivity extends AppCompatActivity {
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
                 Toast.makeText(MainActivity.this, "Authentication Succeeded", Toast.LENGTH_SHORT).show();
+                nextCodeDuration = duration;
+
+                Calendar expiry = Calendar.getInstance();
+                expiry.setTime(new Date());
+                expiry.add(Calendar.MILLISECOND, DEFAULT_DURATION);
+
+                @SuppressLint("SimpleDateFormat")
+                String dateString = String.valueOf(new SimpleDateFormat("dd-MM-yyyy hh:mm").format(expiry.getTime()));
+                mViewModel.createCode(mSelectedLock.getId(), dateString);
 
                 //TODO Request code for default time
 
-                countDownLock(duration);
             }
         });
 
