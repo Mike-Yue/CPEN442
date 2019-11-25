@@ -1,11 +1,19 @@
 package com.cpen442.gamechangers.doorlockcodegenerator.data;
 
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.GetLockersResponse;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
+import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.LockService;
+import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.RetrofitClient;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Response;
+
 public class LockRepository {
+
+    private LockService lockService;
 
     private static volatile LockRepository instance;
 
@@ -13,6 +21,7 @@ public class LockRepository {
 
     private LockRepository(List<Lock> locks) {
         this.locks = locks;
+        lockService = RetrofitClient.getRetrofitInstance().create(LockService.class);
     }
 
     public static LockRepository getInstance() {
@@ -22,13 +31,34 @@ public class LockRepository {
         return instance;
     }
 
-    public List<Lock> getLocks() {
-        return locks;
+    public Result<List<Lock>> getLocks(String token) {
+        try {
+            Response<GetLockersResponse> response = lockService.getLocks(token).execute();
+            if (response.code() == 200) {
+                locks = response.body().getResult();
+                return new Result.Success<>(locks);
+            } else {
+                return new Result.Error("Cannot fetch the lock list");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result.Error("Cannot fetch the lock list");
+        }
     }
 
-    public Result<Lock> addLock(String serial_number, String display_name) {
+    public Result<Lock> addLock(String token, String serial_number, String display_name) {
         Lock newLock = new Lock(serial_number, display_name);
-        locks.add(newLock);
-        return new Result.Success<Lock>(newLock);
+        try {
+            Response<Void> response = lockService.addLock(token, newLock).execute();
+            if (response.code() == 201) {
+                locks.add(newLock);
+                return new Result.Success<>(newLock);
+            } else {
+                return new Result.Error("Failed to create the lock");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result.Error("Failed to create the lock");
+        }
     }
 }

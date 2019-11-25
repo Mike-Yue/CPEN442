@@ -38,6 +38,11 @@ public class LockListAdapter extends RecyclerView.Adapter<LockListAdapter.LockIt
         notifyItemInserted(locks.size());
     }
 
+    public void fetchLocks(List<Lock> locks) {
+        this.locks.addAll(locks);
+        notifyDataSetChanged();
+    }
+
     @Override
     public LockListAdapter.LockItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // Create the view

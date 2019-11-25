@@ -18,6 +18,8 @@ import com.cpen442.gamechangers.doorlockcodegenerator.data.Result;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
@@ -62,6 +64,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mainActivityViewModel.getFetchLocksResult().observe(this,
+                new Observer<Result<List<Lock>>>() {
+            @Override
+            public void onChanged(Result<List<Lock>> result) {
+                if (result instanceof Result.Success) {
+                    List<Lock> locks = ((Result.Success<List<Lock>>) result).getData();
+                    lockListAdapter.fetchLocks(locks);
+                } else if (result instanceof Result.Error) {
+                    Toast.makeText(getApplicationContext(),
+                            ((Result.Error) result).getError(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
         mainActivityViewModel.getAddLockResult().observe(this, new Observer<Result<Lock>>() {
             @Override
             public void onChanged(Result<Lock> result) {
@@ -75,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
     public void showAddLockDialog() {
