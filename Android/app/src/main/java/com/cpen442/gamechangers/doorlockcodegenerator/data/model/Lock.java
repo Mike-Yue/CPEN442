@@ -26,6 +26,11 @@ public class Lock {
         return display_name;
     }
 
+    @Override
+    public String toString() {
+        return !display_name.equals("") ? display_name : id ;
+    }
+
     public void setDisplay_name(String display_name) {
         this.display_name = display_name;
     }

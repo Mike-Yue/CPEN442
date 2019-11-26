@@ -71,10 +71,16 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        setSupportActionBar(mToolbar);
+//        setSupportActionBar(mToolbar);
 
         mViewModel = ViewModelProviders.of(this, new MainActivityViewModelFactory()).get(MainActivityViewModel.class);
         setupCallbacks();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mViewModel.getLocks();
     }
 
     private void setupCallbacks() {
@@ -141,12 +147,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateLocksDropdown(List<Lock> locks) {
         List<Object> dropdownData = new ArrayList<>();
-        dropdownData.add(locks);
+        dropdownData.addAll(locks);
         dropdownData.add("+ Add Lock");
 
         ArrayAdapter<Object> lockArrayAdapter = new ArrayAdapter<>(this,
-                R.layout.support_simple_spinner_dropdown_item,
+                android.R.layout.simple_dropdown_item_1line,
                 dropdownData);
+
         mLockSelect.setAdapter(lockArrayAdapter);
         mLockSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
