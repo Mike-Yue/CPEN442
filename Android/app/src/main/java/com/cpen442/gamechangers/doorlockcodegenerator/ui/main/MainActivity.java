@@ -1,13 +1,16 @@
 package com.cpen442.gamechangers.doorlockcodegenerator.ui.main;
 
 import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
+import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -56,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.show_log)
     View mShowLog;
+
+    @BindView(R.id.lock_icon)
+    ImageView mLockIcon;
 
     private String mToken;
     private Lock mSelectedLock = null;
@@ -127,18 +134,29 @@ public class MainActivity extends AppCompatActivity {
             public void onTick(long msRemaining) {
                 long seconds = msRemaining / 1000;
                 long minutes = seconds / 60;
-                mTimeRemainingText.setText(seconds + "s " + minutes + "m remaining.");
+                mTimeRemainingText.setText(minutes + "m " + (seconds % 60) + "s remaining.");
             }
 
             @Override
             public void onFinish() {
                 mTimeRemainingText.setText(R.string.time_remaining_idle_text);
+                mLockIcon.setImageResource(R.drawable.ic_lock_locked);
+                ImageViewCompat.setImageTintList(mLockIcon,
+                        ColorStateList.valueOf(getColor(R.color.colorAccentLight)));
             }
-        };
+        }.start();
+
+        mLockIcon.setImageResource(R.drawable.ic_lock_unlocked);
+        ImageViewCompat.setImageTintList(mLockIcon,
+                ColorStateList.valueOf(getColor(R.color.colorAccentLight)));
     }
 
     private void onCodeCreated(String code) {
-        mCodeText.setText(code);
+        if (code.startsWith("Your code is")) {
+            mCodeText.setText("[ " + code.replaceAll("[^0-9.]", "") + " ]");
+        } else {
+            mCodeText.setText("[ ERROR ]");
+        }
 
         countDownLock(nextCodeDuration);
         nextCodeDuration = 0;
@@ -161,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
                 Object selected = parent.getItemAtPosition(pos);
                 if (selected instanceof Lock) {
                     mSelectedLock = (Lock) selected;
-                    mToolbar.setTitle(mSelectedLock.getDisplay_name());
+                    countDownLock(0);
                 } else {
                     // Add new lock
                     DialogFragment dialogFragment = new AddLockDiaLogFragment();
@@ -172,6 +190,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+
+        if (locks.size() > 0) {
+            mSelectedLock = locks.get(0);
+        }
     }
 
     private void authenticate(BiometricPrompt.AuthenticationCallback callback) {
@@ -217,7 +239,8 @@ public class MainActivity extends AppCompatActivity {
                 expiry.add(Calendar.MILLISECOND, DEFAULT_DURATION);
 
                 @SuppressLint("SimpleDateFormat")
-                String dateString = String.valueOf(new SimpleDateFormat("dd-MM-yyyy hh:mm").format(expiry.getTime()));
+                String dateString = String.valueOf(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss-08:00").format(expiry.getTime()));
+                Log.i("MainActivity", "onAuthenticationSucceeded: Passsing date = " + dateString);
                 mViewModel.createCode(mSelectedLock.getId(), dateString);
 
                 //TODO Request code for default time
