@@ -90,13 +90,28 @@
             android:id="@+id/last_opened_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@id/last_created_label"
+
+            android:layout_marginStart="@dimen/button_margin"
+            android:layout_marginTop="@dimen/button_margin"
+            android:layout_marginEnd="@dimen/button_margin"
+            android:layout_marginBottom="@dimen/button_margin"
+            android:text="Lock last opened: haven't been opened before yet"
+            android:textAlignment="center" />
+
+        <TextView
+            android:id="@+id/last_created_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
 
             android:layout_above="@id/guest_code_button"
-            android:layout_margin="@dimen/button_margin"
 
-            android:text="Lock last opened: PLACEHOLDER"
-
-            android:textAlignment="center" />
+            android:layout_marginStart="@dimen/button_margin"
+            android:layout_marginTop="@dimen/button_margin"
+            android:layout_marginEnd="@dimen/button_margin"
+            android:layout_marginBottom="@dimen/button_margin"
+            android:textAlignment="center"
+            tools:text="Lock last created: PLACEHOLDER" />
 
         <Button
             android:id="@+id/guest_code_button"
@@ -141,6 +156,7 @@
             android:layout_marginBottom="@dimen/button_margin"
 
             android:text="Unlock Now" />
+
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,16 +1,24 @@
 package com.cpen442.gamechangers.doorlockcodegenerator.data;
 
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.CodeInfo;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.CreateCodeRequest;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.CreateCodeResponse;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.GetCodesResponse;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.GetLockersResponse;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.LockService;
 import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.RetrofitClient;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import retrofit2.Response;
 
@@ -77,6 +85,54 @@ public class LockRepository {
         } catch (IOException e) {
             e.printStackTrace();
             return new Result.Error("Failed to create the code");
+        }
+    }
+
+    public Result<CodeInfo> getCodeInfo(String token, String lock_id) {
+        try {
+            Response<GetCodesResponse> response = lockService.getCodes(token).execute();
+            if (response.code() == 200) {
+                List<CodeInfo> codeInfos = response.body().getCodeInfos().stream()
+                        .filter(element -> element.getLock().getId().equals(lock_id))
+                        .collect(Collectors.toList());
+                String next = response.body().getNext();
+                while (next != null) {
+                    response = lockService.getCodes(next, token).execute();
+                    codeInfos.addAll(response.body().getCodeInfos().stream()
+                            .filter(element -> element.getLock().getId().equals(lock_id))
+                            .collect(Collectors.toList()));
+                    next = response.body().getNext();
+                }
+                CodeInfo codeInfo = codeInfos.stream()
+                        .filter(element -> !element.isExpired())
+                        .findAny()
+                        .orElse(null);
+                if (codeInfo == null) {
+                    codeInfo = codeInfos.stream().filter(c -> c.getUsed_at_time() != null)
+                            .max((c1, c2) -> {
+                                try {
+                                    Date d1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
+                                            .parse(c1.getUsed_at_time());
+                                    Date d2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
+                                            .parse(c2.getUsed_at_time());
+                                    if (d1.getTime() == d2.getTime()) {
+                                        return 0;
+                                    } else {
+                                        return d1.getTime() < d2.getTime() ? -1 : 1;
+                                    }
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                    return 0;
+                                }
+                            }).orElse(null);
+                }
+                return new Result.Success<CodeInfo>(codeInfo);
+            } else {
+                return new Result.Error("Failed to fetch the code info");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result.Error("Failed to fetch the code info");
         }
     }
 }
