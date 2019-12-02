@@ -75,8 +75,13 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.last_opened_label)
     TextView mLast_opened_label;
 
-    private String mToken;
-    private Lock mSelectedLock = null;
+    @BindView(R.id.last_created_label)
+    TextView mLast_created_label;
+
+    @BindView(R.id.unlock_now_button)
+    Button mGenerate_code_button;
+
+
     private MainActivityViewModel mViewModel;
     private List<Lock> mLocks;
     private long nextCodeDuration = 0;
@@ -97,6 +102,15 @@ public class MainActivity extends AppCompatActivity {
         mViewModel.getLocks();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mViewModel.getSelectedLock() != null) {
+            mViewModel.getCodeInfo();
+        }
+    }
+
+
 
     private void setupCallbacks() {
         mViewModel.getFetchLocksResult().observe(this, result -> {
@@ -105,9 +119,9 @@ public class MainActivity extends AppCompatActivity {
                 populateLocksDropdown(mLocks);
 
                 // Get Code Info for the selected lock
-                if (mSelectedLock != null) {
-                    mViewModel.getCodeInfo(mSelectedLock.getId());
-                }
+//                if (mSelectedLock != null) {
+//                    mViewModel.getCodeInfo(mSelectedLock.getId());
+//                }
             } else {
                 Toast.makeText(this, "Error fetching lock list", Toast.LENGTH_SHORT).show();
             }
@@ -125,17 +139,20 @@ public class MainActivity extends AppCompatActivity {
                     mLockIcon.setImageResource(R.drawable.ic_lock_locked);
                     ImageViewCompat.setImageTintList(mLockIcon,
                             ColorStateList.valueOf(getColor(R.color.colorAccentDark)));
+
                 } else {
                     try {
                         Date expiry_time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
                                 .parse(codeInfo.getExpiry_time());
                         long duration = expiry_time.getTime() - new Date().getTime();
                         if (duration <= 0) {
-                            mCodeText.setText("[ EXPIRED ]");
+                            mCodeText.setText("[ LOCKED ]");
                             mTimeRemainingText.setText(R.string.time_remaining_idle_text);
                             mLockIcon.setImageResource(R.drawable.ic_lock_locked);
                             ImageViewCompat.setImageTintList(mLockIcon,
                                     ColorStateList.valueOf(getColor(R.color.colorAccentDark)));
+
+
                         } else {
                             mLockIcon.setImageResource(R.drawable.ic_lock_unlocked);
                             ImageViewCompat.setImageTintList(mLockIcon,
@@ -147,15 +164,26 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    try {
+                }
+
+                try {
+                    if (codeInfo != null) {
+                        if (codeInfo.getUsed_at_time() != null) {
+                            Date used_at_time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX"))
+                                    .parse(codeInfo.getUsed_at_time());
+                            mLast_opened_label.setText(String.format("Code last opened " + getTimeFromNow(used_at_time)));
+                        } else {
+                            mLast_opened_label.setText("Lock last opened: haven't been opened before yet");
+                        }
+                    }
+                    if (codeInfo.getCreation_time() != null) {
                         Date creation_time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX"))
                                 .parse(codeInfo.getCreation_time());
-                        mLast_opened_label.setText(String.format("Code last created by user: "
-                                + codeInfo.getCreated_by().getEmail()
-                                + " at " + getTimeFromNow(creation_time)));
-                    } catch (ParseException e) {
-                        e.printStackTrace();
+                        mLast_created_label.setText(String.format("Code last created by user: "
+                                + codeInfo.getCreated_by().getEmail() + " " + getTimeFromNow(creation_time)));
                     }
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
             } else if (result instanceof Result.Error) {
                 Toast.makeText(getApplicationContext(),
@@ -178,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
         mViewModel.getCreateCodeResult().observe(this, result -> {
             if (result instanceof Success) {
-                mViewModel.getCodeInfo(mSelectedLock.getId());
+                mViewModel.getCodeInfo();
             } else if (result instanceof Result.Error) {
                 Toast.makeText(getApplicationContext(),
                         ((Result.Error) result).getError(),
@@ -198,7 +226,19 @@ public class MainActivity extends AppCompatActivity {
             public void onTick(long msRemaining) {
                 long seconds = msRemaining / 1000;
                 long minutes = seconds / 60;
-                mTimeRemainingText.setText(minutes + "m " + (seconds % 60) + "s remaining.");
+                long hours = minutes / 60;
+                long days = hours / 24;
+                String text = (seconds % 60) + "s remaining.";
+                if (minutes > 0) {
+                    text = (minutes % 60) + "m " + text;
+                }
+                if (hours > 0) {
+                    text = (hours % 24) + "h " + text;
+                }
+                if (days > 0) {
+                    text = days + "days " + text;
+                }
+                mTimeRemainingText.setText(text);
             }
 
             @Override
@@ -221,9 +261,6 @@ public class MainActivity extends AppCompatActivity {
         }
         mCodeText.setText(codeText);
 
-//        countDownLock(nextCodeDuration);
-//        nextCodeDuration = 0;
-
     }
 
     private void populateLocksDropdown(List<Lock> locks) {
@@ -241,9 +278,8 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 Object selected = parent.getItemAtPosition(pos);
                 if (selected instanceof Lock) {
-                    mSelectedLock = (Lock) selected;
-
-                    mViewModel.getCodeInfo(mSelectedLock.getId());
+                    mViewModel.setSelectedLock((Lock) selected);
+                    mViewModel.getCodeInfo();
                     //countDownLock(0);
                 } else {
                     // Add new lock
@@ -257,26 +293,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (locks.size() > 0) {
-            mSelectedLock = locks.get(0);
-        }
-    }
-
-    private void authenticate(BiometricPrompt.AuthenticationCallback callback) {
-        Handler handler = new Handler();
-        Executor executor = handler::post;
-
-        BiometricManager biometricManager = BiometricManager.from(this);
-        if(biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS){
-            BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("Generate Unlock Code")
-                    .setDescription("Authenticate with biometrics to generate an unlock code now.")
-                    .setNegativeButtonText("Don't generate code now")
-                    .build();
-            BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor, callback);
-            biometricPrompt.authenticate(promptInfo);
-        } else {
-            // No biometrics, give error message
-            Toast.makeText(this, "Only phones with biometrics are currently supported", Toast.LENGTH_SHORT).show();
+            mViewModel.setSelectedLock((Lock) locks.get(0));
+            mViewModel.getCodeInfo();
         }
     }
 
@@ -284,36 +302,13 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.unlock_now_button)
     void generateOwnCode() {
-        getCode(DEFAULT_DURATION);
+        DialogFragment dialogFragment = new DateTimePickerFragment();
+        dialogFragment.show(getSupportFragmentManager(), "dateTimePicker");
     }
 
     @OnClick(R.id.guest_code_button)
     void generateGuestCode() {
     }
-
-    private void getCode(final long duration) {
-//        authenticate(new BiometricPrompt.AuthenticationCallback() {
-//            @Override
-//            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-//                super.onAuthenticationSucceeded(result);
-                Toast.makeText(MainActivity.this, "Authentication Succeeded", Toast.LENGTH_SHORT).show();
-                nextCodeDuration = duration;
-
-                Calendar expiry = Calendar.getInstance();
-                expiry.setTime(new Date());
-                expiry.add(Calendar.MILLISECOND, DEFAULT_DURATION);
-
-                @SuppressLint("SimpleDateFormat")
-                String dateString = String.valueOf(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(expiry.getTime()));
-                Log.i("MainActivity", "onAuthenticationSucceeded: Passsing date = " + dateString);
-                mViewModel.createCode(mSelectedLock.getId(), dateString);
-
-                //TODO Request code for default time
-
-            }
-//        });
-
-//    }
 
     public String getTimeFromNow(Date date) {
         long timeFromNow = System.currentTimeMillis() - date.getTime();
@@ -325,20 +320,20 @@ public class MainActivity extends AppCompatActivity {
 
         timeFromNow /= SECONDS_IN_MINUTE;  // Into Minutes
         if (timeFromNow < MINUTES_IN_HOUR) {
-            return timeFromNow + (timeFromNow == 1 ? " minute" : " minutes");
+            return "at " + timeFromNow + (timeFromNow == 1 ? " minute" : " minutes") + " ago";
         }
 
         timeFromNow /= MINUTES_IN_HOUR;  // Into Hours
         if (timeFromNow < HOURS_IN_DAY) {
-            return timeFromNow + (timeFromNow == 1 ? " hour" : " hours");
+            return "at " + timeFromNow + (timeFromNow == 1 ? " hour" : " hours") + " ago";
         }
 
         timeFromNow /= HOURS_IN_DAY;  // Into days
         if (timeFromNow < DAYS_IN_MONTH) {
-            return timeFromNow + (timeFromNow == 1 ? " day" : " days");
+            return "in " + timeFromNow + (timeFromNow == 1 ? " day" : " days") + " ago";
         }
 
         timeFromNow /= DAYS_IN_MONTH;  // Roughly months
-        return timeFromNow + (timeFromNow == 1 ? " month" : " months");
+        return "in " + timeFromNow + (timeFromNow == 1 ? " month" : " months") + " ago";
     }
 }

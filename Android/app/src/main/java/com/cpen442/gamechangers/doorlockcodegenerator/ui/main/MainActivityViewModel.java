@@ -8,20 +8,26 @@ import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class MainActivityViewModel extends ViewModel {
     private AuthRepository authRepository;
+    private Lock selectedLock;
     private MutableLiveData<Result<Lock>> addLockResult = new MutableLiveData<>();
     private MutableLiveData<Result<List<Lock>>> fetchLocksResult = new MutableLiveData<>();
     private MutableLiveData<Result<String>> createCodeResult = new MutableLiveData<>();
     private MutableLiveData<Result<CodeInfo>> fetchCodeResult = new MutableLiveData<>();
     private LockRepository lockRepository;
+
+    public Lock getSelectedLock() {
+        return selectedLock;
+    }
+
+    public void setSelectedLock(Lock selectedLock) {
+        this.selectedLock = selectedLock;
+    }
 
     public MutableLiveData<Result<List<Lock>>> getFetchLocksResult() {
         return fetchLocksResult;
@@ -30,6 +36,7 @@ public class MainActivityViewModel extends ViewModel {
     public MainActivityViewModel(AuthRepository authRepository, LockRepository lockRepository) {
         this.authRepository = authRepository;
         this.lockRepository = lockRepository;
+        selectedLock = null;
     }
 
     public MutableLiveData<Result<Lock>> getAddLockResult() {
@@ -44,16 +51,16 @@ public class MainActivityViewModel extends ViewModel {
         new Thread(new FetchLocksTask()).start();
     }
 
-    public void createCode(String lock_id, String expiry_time) {
-        new Thread(new CreateCodeTask(lock_id, expiry_time)).start();
+    public void createCode(String expiry_time) {
+        new Thread(new CreateCodeTask(expiry_time)).start();
     }
 
     public MutableLiveData<Result<String>> getCreateCodeResult() {
         return createCodeResult;
     }
 
-    public void getCodeInfo(String lock_id) {
-        new Thread(new FetchCodeTask(lock_id)).start();
+    public void getCodeInfo() {
+        new Thread(new FetchCodeTask(selectedLock.getId())).start();
     }
 
     public MutableLiveData<Result<CodeInfo>> getFetchCodeResult() {
@@ -102,18 +109,16 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     private class CreateCodeTask implements Runnable {
-        private String lock_id;
         private String expiry_time;
 
-        public CreateCodeTask(String lock_id, String expiry_time) {
-            this.lock_id = lock_id;
+        public CreateCodeTask(String expiry_time) {
             this.expiry_time = expiry_time;
         }
 
         @Override
         public void run() {
             String token = "Token " + authRepository.getToken();
-            Result<String> result = lockRepository.createCode(token, lock_id, expiry_time);
+            Result<String> result = lockRepository.createCode(token, selectedLock.getId(), expiry_time);
             createCodeResult.postValue(result);
         }
     }
