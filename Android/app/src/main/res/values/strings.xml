@@ -7,4 +7,5 @@
     <string name="time_remaining_idle_text">Generate a code to unlock</string>
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
+    <string name="locked_text">[ LOCKED ]</string>
 </resources>

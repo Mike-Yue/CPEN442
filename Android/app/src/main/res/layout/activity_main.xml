@@ -53,7 +53,7 @@
             android:background="@color/colorPrimaryDark"
             android:elevation="8dp"
 
-            android:text="[ LOCKED ]"
+            android:text="@string/locked_text"
             android:textAlignment="center"
 
             tools:targetApi="o" />
@@ -116,6 +116,8 @@
             android:autoSizeMaxTextSize="22sp"
             android:autoSizeMinTextSize="8sp"
             android:autoSizeTextType="uniform"
+
+            android:visibility="gone"
 
             android:text="Generate Guest Code" />
 

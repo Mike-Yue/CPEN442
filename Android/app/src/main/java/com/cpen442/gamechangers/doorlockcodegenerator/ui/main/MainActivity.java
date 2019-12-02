@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int DEFAULT_DURATION = 1000 * 60 * 3;
+    public static final int DEFAULT_DURATION = 1000 * 30;
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
 
@@ -135,32 +135,40 @@ public class MainActivity extends AppCompatActivity {
                 long seconds = msRemaining / 1000;
                 long minutes = seconds / 60;
                 mTimeRemainingText.setText(minutes + "m " + (seconds % 60) + "s remaining.");
+                showUnlocked();
             }
 
             @Override
             public void onFinish() {
                 mTimeRemainingText.setText(R.string.time_remaining_idle_text);
-                mLockIcon.setImageResource(R.drawable.ic_lock_locked);
-                ImageViewCompat.setImageTintList(mLockIcon,
-                        ColorStateList.valueOf(getColor(R.color.colorAccentLight)));
+                showLocked();
             }
         }.start();
 
+    }
+
+    private void showLocked() {
+        mLockIcon.setImageResource(R.drawable.ic_lock_locked);
+        ImageViewCompat.setImageTintList(mLockIcon,
+                ColorStateList.valueOf(getColor(R.color.colorPrimaryDark)));
+        mCodeText.setText(R.string.locked_text);
+    }
+
+    private void showUnlocked() {
         mLockIcon.setImageResource(R.drawable.ic_lock_unlocked);
         ImageViewCompat.setImageTintList(mLockIcon,
                 ColorStateList.valueOf(getColor(R.color.colorAccentLight)));
     }
 
+
     private void onCodeCreated(String code) {
         if (code.startsWith("Your code is")) {
             mCodeText.setText("[ " + code.replaceAll("[^0-9.]", "") + " ]");
+            countDownLock(nextCodeDuration);
         } else {
             mCodeText.setText("[ ERROR ]");
         }
-
-        countDownLock(nextCodeDuration);
         nextCodeDuration = 0;
-
     }
 
     private void populateLocksDropdown(List<Lock> locks) {
@@ -179,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
                 Object selected = parent.getItemAtPosition(pos);
                 if (selected instanceof Lock) {
                     mSelectedLock = (Lock) selected;
-                    countDownLock(0);
+                    showLocked();
                 } else {
                     // Add new lock
                     DialogFragment dialogFragment = new AddLockDiaLogFragment();
