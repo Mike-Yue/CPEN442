@@ -1,7 +1,9 @@
 package com.cpen442.gamechangers.doorlockcodegenerator.data;
 
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.CodeInfo;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.CreateCodeRequest;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.CreateCodeResponse;
+import com.cpen442.gamechangers.doorlockcodegenerator.data.model.GetCodesResponse;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.GetLockersResponse;
 import com.cpen442.gamechangers.doorlockcodegenerator.data.model.Lock;
 import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.LockService;
@@ -10,7 +12,7 @@ import com.cpen442.gamechangers.doorlockcodegenerator.httpClient.RetrofitClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 import retrofit2.Response;
 
@@ -77,6 +79,31 @@ public class LockRepository {
         } catch (IOException e) {
             e.printStackTrace();
             return new Result.Error("Failed to create the code");
+        }
+    }
+
+    public Result<CodeInfo> getCodeInfo(String token, String lock_id) {
+        try {
+            Response<GetCodesResponse> response = lockService.getCodes(token).execute();
+            if (response.code() == 200) {
+                List<CodeInfo> codeInfos = response.body().getCodeInfos();
+                String next = response.body().getNext();
+                while (next != null) {
+                    response = lockService.getCodes(next, token).execute();
+                    codeInfos.addAll(response.body().getCodeInfos());
+                    next = response.body().getNext();
+                }
+                CodeInfo codeInfo = codeInfos.stream()
+                        .filter(element -> element.getLock().getId().equals(lock_id) && !element.isExpired())
+                        .findAny()
+                        .orElse(null);
+                return new Result.Success<CodeInfo>(codeInfo);
+            } else {
+                return new Result.Error("Failed to fetch the code info");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result.Error("Failed to fetch the code info");
         }
     }
 }
