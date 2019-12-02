@@ -175,12 +175,13 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             mLast_opened_label.setText("Lock last opened: haven't been opened before yet");
                         }
-                    }
-                    if (codeInfo.getCreation_time() != null) {
-                        Date creation_time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX"))
-                                .parse(codeInfo.getCreation_time());
-                        mLast_created_label.setText(String.format("Code last created by user: "
-                                + codeInfo.getCreated_by().getEmail() + " " + getTimeFromNow(creation_time)));
+
+                        if (codeInfo.getCreation_time() != null) {
+                            Date creation_time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX"))
+                                    .parse(codeInfo.getCreation_time());
+                            mLast_created_label.setText(String.format("Code last created by user: "
+                                    + codeInfo.getCreated_by().getEmail() + " " + getTimeFromNow(creation_time)));
+                        }
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
