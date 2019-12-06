@@ -53,21 +53,14 @@ Mike Yue developed the server code and Austine Yapp produced the software for th
 	Access control systems are classified by an electrical control and mechanical door-lock analog according to their operating method. It is possible to classify electronic door-locks based on their recognition technology, namely card recognition, number input method, and methods of bio-information recognition. These categories mainly fall into the three universally recognized authentication factors that exist today: what you know (passwords), what you have (tokens, keys) and what you are (biometrics). 
 Passwords are considered to be one of the easiest targets for hackers. Many companies are therefore searching for more secure methods to protect the information of their customers and employees. On the other hand, biometrics are known to be highly secure and used in specific organizations. However, the hardware and maintenance cost required to upkeep such a system is relatively expensive. One way of bypassing the hardware requirements is to utilize the existing resources on mobile phones such as fingerprint scanners and/or facial recognition technology.
 
-<<<<<<< Updated upstream
-\section{Adversary Model}
-=======
 \subsection{Similar Systems}
 	One Time Password (OTP) is a single-use password that is valid for only one login session or transaction. It is often used in various fields such as banking to provide an additional layer of security. OTP challenge-response methods can be broadly classified into event-synchronization, time-synchronization, and a combination of methods \cite{b4} \cite{b5}. Every challenge-response OTP method requires users to provide a response to a challenge. The new password is traditionally generated using a mathematical algorithm based on a challenge, which is eventually used to authenticate the users. Event-synchronization method relies on the HMAC-based One-Time Password (HOTP) algorithm published in IETF RFC 4226 \cite{b6} to generate a new password. Time-synchronization OTP method is an extension of HOTP published in IETF RFC 6238 \cite{b7} which uses the current time instead of mathematical algorithms in order to generate a new password that remains valid for the duration of a specified time step. While both OTP methods offer single-use passwords, HOTP remains valid until it is used, or until a subsequent OTP is generated. In contrast, TOTP only has one valid OTP at any given time, with a smaller predefined validation window. HOTPs are thus more susceptible to a brute-force attack due to the larger validation window.
 	One similar system is the Grey system at CMU which proposes the utilization of “smartphones” for unifying access control to both physical (e.g. doors, safes) and virtual (e.g. files, accounts) resources. The Grey system suggests the use of smartphones as the central agent through which access control is managed, namely because of their prevalent adoption in society as well as the hardware capabilities present that would enable applications to take full advantage of the rich computation, communication, and interface capabilities. It employs proof-carrying authorization (PCA) \cite{b8} extended with a new distributed proving technique with considerable efficiency improvements \cite{b9}. Our designs are similar in the fact that both our systems utilize smartphones for client-side authentication. Also, both designs are intended to conveniently authorize access to other people. 
 	One difference in our design from the Grey system is the initial set up of the lock system. In the Grey system, this initial set up is done via either Bluetooth discovery or using the phone’s camera to photograph a two-dimensional barcode. Our system instead requires the user to activate the lock via a unique serial number upon first use. In order to do so, the user has to first be logged in to an account associated with our server. Subsequent attempts to unlock the digital lock will require either user account log-in or biometric authorization. Furthermore, our system employs the use of TOTP as the challenge-response OTP mechanism. Users of the Grey system utilize static PIN codes in order to activate their individual private key for authorization. Even though the PIN code entry system is abstracted to the smartphone, it is still highly vulnerable to the same adversarial attacks such as shoulder surfing and/or social engineered attacks.
 
->>>>>>> Stashed changes
-
 \section{Adversary Model}
 
-<<<<<<< Updated upstream
 \section{System Prototype}
-=======
 \section{System Design}
 \subsection{Overview}
 	Instead of a static pin code, we use a dynamically-generated TOTP access code. First, the user must authenticate themselves using their mobile device’s fingerprint scanner to unlock the device’s unique fingerprint secret which was generated when the application was first started. Next, the application sends the fingerprint secret to the server for authentication. The server then sends the list of authorized locks for the user to unlock. Upon selecting a particular lock, the server generates a valid TOTP code associated with that lock, and this code is sent to the user through the mobile app. TOTP is an extension of the HOTP algorithm that uses a secret shared key and the current timestamp as inputs to a cryptographic HMAC hash function. User input in the lock is then sent to the server and verified on the server-side. If the code entered is valid, the server returns a success message and unlocks the lock. Otherwise, the server returns a forbidden message and the lock remains unlocked.
@@ -80,30 +73,87 @@ Moreover, adversaries may attempt to gain access to the access codes through a s
 \section{System Prototype}
 \subsection{Hardware}
 	We used a RaspberryPi Zero W to build the prototype of our digital lock system. We connected a numeric keypad to simulate a traditional keypad door lock to provide input to the RaspberryPi. Upon entry by a user, the lock system uses the requests Python module to establish a connection with the server via HTTPS. The lock system then retrieves its own serial number and sends it along with the code entered by the user. On the server-side, the code is checked with the lock associated with the serial number. If the code is valid, the server returns a success message. Otherwise, a forbidden message is returned. The digital lock then checks the response from the server and unlocks the lock if and only if the server managed to authenticate the user’s code. On the digital lock side, communication with the server is not authenticated. This is intentional in order to allow a third-party to gain access through an authorized user. For example, a domestic cleaner (unauthorized) may be granted one-time access by a homeowner (authorized).
->>>>>>> Stashed changes
 
 \section{Evaluation}
-
+\newpage
+ajaj
+\newpage
 \section{Discussion}
+In this section, we will discuss the advantages and benfits of our system prototype and its broader design.
+We will then examine its limitations and disadvantages.
+Finally, we will consider the findings of our project overall, with these aforementioned `pros' and `cons' in mind.
+
+Our prototype system is complete enough for us to draw useful conclusions about a similar potential product but is by no means a complete system in of itself.
+The simple design allowed the development team to produce an MVP (Minimum Viable Product) and then iterate on this initial product to build our prototype system.
+Fundamentally, our system only comprises a subset of the hardware needed for an electronic door lock, namely the authentication and control electronics.
+Many non-core processes have been omitted from our prototype, namely a secure lock enrollment method and a full logging system.
+Although our prototype was missing these features, we were still able to collect significant data about the usability of this kind of system, which could easily be incorporated into a future commercial security device.
+
+\subsection{Advantages}
+User testing showed that users appreciated the clear security benefits of our system but did find it to be a slight inconvenience.
+The trade-off of security and convenience is a core problem when designing security products for use by the general public; users will be hesitant to opt-in to enhanced security measures if they deem it to be a significant inconvenience.
+It has been shown that almost two-thirds of users will select the least secure and most convenienent security option if given the choice \cite{bben1}.
+Our system seeked to strike a good balance between the extra security benefits of TOTP codes and the convenience of a numeric keypad lock.
+
+All types of shoulder-surfing and replay attacks are completely defeated by our device, meaning that there aren't many possible `subtle' (ie non-destructive) attacks against our system.
+However, it is worth noting that the Wi-Fi connected electronics, mobile application and server are all attack surfaces not present in standard keypad-operated access control systems.
+Overall risk incurred by the device is therefore reduced, as the vulnerability value is significantly decreased.
+
+Given our adversay model, our device successfully resists most known capabilities, such as replay attacks with pinhole cameras.
+The adversary model does also assume that they would be able to gain access to the user's phone using a social engineering attack, and given access to the phone it is possible that the adverary would be able to comprimise the system.
+This is because if the threat agent is able to unlock the phone, they should be able to enrol their own biometrics and therefore activate the code generation in the android application.
+The risk of access in this way is mitigated in a few different ways.
+Enrolling a fingerprint with android  and then generating an unlock code would typically takes upwards of a minute, which would likely arrouse the suspiscion of the owner.
+The impact of this kind of attack could be further reduced if guidance was added to the android application telling users to be aware of such social engineering attacks and not to share their phone wiht strangers without being aware of what they're doing.
+The other mitigation of this kind of attack relies on the expiry time of the single-use code, as the adversary would have to get to the door lock in time to use the comprimised code --- which is likely take a significant amount of time due phsycial distance.
+A sophisticated attack could have another adversary located closer to the door, but this level of organization is uncharacteristic for an oppourtunistic threat agent.
+
+\subsection{Limitations}
+As mentioned before, the phsycial security of our prototype device was out of scope for this project, but would be an important part of the design if we wanted to bring a product like this to market.
+Our prototype, however, did suffer from a few limitations which impeded both security and usability.
+
+An auto-login feature would greatly improve user effiency, and would not impair security significantly, as biometrics would still be needed to generate a code.
+This enhancement to the mobile application could easily half the time needed to generate a code in the app, as currently the app will force a user to log in manually if it has not been opened recently (if the activity has not yet been started or has been killed by android).
+Currently, this limitation significantly impairs the user experience of using our entire system, as typing a username and password is not only a time consuming acitivity, but a fairly difficult and precise process.
+Most users would have to stand still in order to do this, which is frustrating for a potential user.
+With an auto-login feature no precise actions are required, meaning a user could generate a code as they walk up to the door and would only have to stop to type in the code --- the same as a traditional keypad lock.
+
+Somewhat counter-intuitively, it would increase the overall security of the system to remove the ability of users to manually set the expiry time of codes.
+The current behavior limits the effectiveness of the TOTP codes and encourages users to generate codes ahead of time, making the system much less secure.
+This would force codes to always expire after a certain, short, amount of time (eg two minutes); which would force users to only generate codes when they intent to use them immediately.
+Another benefit of this change would be that the speed of generating a code would improve, as it would be another step that the user would not have to do.
+
+Another significant limitation of our design is that a planned `failure mode' was not integrated. This is where the lock would accept a more secure (eight digits) long-term code to unlock if the user was to not have access to their phone.
+This was not implemtned into our prototype due to the additional development effort that would be needed
+It does, also, pose a signficant security issue --- as it subverts a signficant amount of the security design in the core product.
+We demed that it would be neccesairy in a commercial product but did not resolve the challenges associated with designing such a protocol, essentiall making it easy for the legitimate users while keeping the lock secure.
+This would be a great avenue for future research.
+
+\subsection{Overall Findings}
+Overall, we found that security was significantly increased by using our system in place of a traditional keypad lock, when using our defined adversary model.
+However it is, of course, more inconvenient to use our system over a traditional keypad-based access control system. 
+
+We believe that the compromise is likely to be accepted by the majority of security-conscious consumers, as well as many large corporations currently utilizing keypad door locks.
+Corporations pose signficant potential customers for this kind of system, as the value of assets protected by access control systems can be massive, and the traceability offered by a system such as ours would be very useful when many different people might need access at different times.
 
 \section{Conclusion}
 
-\begin{table}[htbp]
-\caption{Table Type Styles}
-\begin{center}
-\begin{tabular}{|c|c|c|c|}
-\hline
-\textbf{Table}&\multicolumn{3}{|c|}{\textbf{Table Column Head}} \\
-\cline{2-4} 
-\textbf{Head} & \textbf{\textit{Table column subhead}}& \textbf{\textit{Subhead}}& \textbf{\textit{Subhead}} \\
-\hline
-copy& More table copy$^{\mathrm{a}}$& &  \\
-\hline
-\multicolumn{4}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
-\end{tabular}
-\label{tab1}
-\end{center}
-\end{table}
+% \begin{table}[htbp]
+% \caption{Table Type Styles}
+% \begin{center}
+% \begin{tabular}{|c|c|c|c|}
+% \hline
+% \textbf{Table}&\multicolumn{3}{|c|}{\textbf{Table Column Head}} \\
+% \cline{2-4} 
+% \textbf{Head} & \textbf{\textit{Table column subhead}}& \textbf{\textit{Subhead}}& \textbf{\textit{Subhead}} \\
+% \hline
+% copy& More table copy$^{\mathrm{a}}$& &  \\
+% \hline
+% \multicolumn{4}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
+% \end{tabular}
+% \label{tab1}
+% \end{center}
+% \end{table}
 
 % \begin{figure}[htbp]
 % \centerline{\includegraphics{fig1.png}}
@@ -111,54 +161,29 @@ copy& More table copy$^{\mathrm{a}}$& &  \\
 % \label{fig}
 % \end{figure}
 
-Figure Labels: Use 8 point Times New Roman for Figure labels. Use words 
-rather than symbols or abbreviations when writing Figure axis labels to 
-avoid confusing the reader. As an example, write the quantity 
-``Magnetization'', or ``Magnetization, M'', not just ``M''. If including 
-units in the label, present them within parentheses. Do not label axes only 
-with units. In the example, write ``Magnetization (A/m)'' or ``Magnetization 
-\{A[m(1)]\}'', not just ``A/m''. Do not label axes with a ratio of 
-quantities and units. For example, write ``Temperature (K)'', not 
-``Temperature/K''.
 
-\section*{Acknowledgment}
+% \section*{References}
 
-The preferred spelling of the word ``acknowledgment'' in America is without 
-an ``e'' after the ``g''. Avoid the stilted expression ``one of us (R. B. 
-G.) thanks $\ldots$''. Instead, try ``R. B. G. thanks$\ldots$''. Put sponsor 
-acknowledgments in the unnumbered footnote on the first page.
+% Please number citations consecutively within brackets \cite{b1}. The 
+% sentence punctuation follows the bracket \cite{b2}. Refer simply to the reference 
+% number, as in \cite{b3}---do not use ``Ref. \cite{b3}'' or ``reference \cite{b3}'' except at 
+% the beginning of a sentence: ``Reference \cite{b3} was the first $\ldots$''
 
-\section*{References}
+% Number footnotes separately in superscripts. Place the actual footnote at 
+% the bottom of the column in which it was cited. Do not put footnotes in the 
+% abstract or reference list. Use letters for table footnotes.
 
-Please number citations consecutively within brackets \cite{b1}. The 
-sentence punctuation follows the bracket \cite{b2}. Refer simply to the reference 
-number, as in \cite{b3}---do not use ``Ref. \cite{b3}'' or ``reference \cite{b3}'' except at 
-the beginning of a sentence: ``Reference \cite{b3} was the first $\ldots$''
+% Unless there are six authors or more give all authors' names; do not use 
+% ``et al.''. Papers that have not been published, even if they have been 
+% submitted for publication, should be cited as ``unpublished'' \cite{b4}. Papers 
+% that have been accepted for publication should be cited as ``in press'' \cite{b5}. 
+% Capitalize only the first word in a paper title, except for proper nouns and 
+% element symbols.
 
-Number footnotes separately in superscripts. Place the actual footnote at 
-the bottom of the column in which it was cited. Do not put footnotes in the 
-abstract or reference list. Use letters for table footnotes.
-
-Unless there are six authors or more give all authors' names; do not use 
-``et al.''. Papers that have not been published, even if they have been 
-submitted for publication, should be cited as ``unpublished'' \cite{b4}. Papers 
-that have been accepted for publication should be cited as ``in press'' \cite{b5}. 
-Capitalize only the first word in a paper title, except for proper nouns and 
-element symbols.
-
-For papers published in translation journals, please give the English 
-citation first, followed by the original foreign-language citation \cite{b6}.
+% For papers published in translation journals, please give the English 
+% citation first, followed by the original foreign-language citation \cite{b6}.
 
 \begin{thebibliography}{00}
-\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-<<<<<<< Updated upstream
-\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-\bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
-\bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
-\bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
-\bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
-\bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
-=======
 \bibitem{b2} G D Lam, “Evaluating the Usability of an Apple Touch ID-Based Access Control System” University of British Columbia, April 2015.
 \bibitem{b3} L. Bauer, S. Garriss, J. M. Mccune, M. K. Reiter, J. Rouse, and P. Rutenbar, “Device-Enabled Authorization in the Grey System,” Jan. 2005.
 \bibitem{b4} D. Choi, W. Kim and D. Won, “One-Time Password Technology Analysis and Standardization Trend,” Review of KIISC, vol. 17,no. 3, pp. 12-17, Jun. 2007.
@@ -167,10 +192,6 @@ citation first, followed by the original foreign-language citation \cite{b6}.
 \bibitem{b7} ”RFC 6238 - TOTP: Time-based One-time Password Algorithm”, Tools.ietf.org, 2016. [Online]. Available: https://tools.ietf.org/html/rfc6238. [Accessed: 05- Dec- 2019].
 \bibitem{b8} A. W. Appel and E. W. Felten. Proof-carrying authentication. In Proc. 6th ACM Conference on Computer and Communications Security, Nov. 1999.
 \bibitem{b9} L. Bauer, S. Garriss, and M. K. Reiter. Distributed proving in access-control systems. In Proc. 2005 IEEE Symposium on Security and Privacy, May 2005.
->>>>>>> Stashed changes
+\bibitem{bben1} Weir, C.S., Douglas, G., Carruthers, M. and Jack, M., 2009. User perceptions of security, convenience and usability for ebanking authentication tokens. Computers \& Security, 28(1-2), abstract.
 \end{thebibliography}
-\vspace{12pt}
-\color{red}
-IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
-
 \end{document}
