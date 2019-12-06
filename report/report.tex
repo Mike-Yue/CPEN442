@@ -15,13 +15,30 @@
 Group 4: Gamechangers
 }
 
-\author{\IEEEauthorblockN{1\textsuperscript{st} Ben Henaghan}
+\author{
+\IEEEauthorblockN{Ben Henaghan}
+\IEEEauthorblockA{\textit{Department of Electrical and Computer Engineering} \\
+\textit{University of British Columbia}\\
+Vancouver, Canada \\
+Student Number: 96671466}
 \and
-\IEEEauthorblockN{2\textsuperscript{nd} Scott Wang}
+\IEEEauthorblockN{Scott Wang}
+\IEEEauthorblockA{\textit{Department of Electrical and Computer Engineering} \\
+\textit{University of British Columbia}\\
+Vancouver, Canada \\
+Student Number:  72573322}
 \and
-\IEEEauthorblockN{3\textsuperscript{rd} Austine Yapp}
+\IEEEauthorblockN{Austine Yapp}
+\IEEEauthorblockA{\textit{Department of Electrical and Computer Engineering} \\
+\textit{University of British Columbia}\\
+Vancouver, Canada \\
+Student Number:  86705340}
 \and
-\IEEEauthorblockN{4\textsuperscript{th} Mike Yue}
+\IEEEauthorblockN{Mike Yue}
+\IEEEauthorblockA{\textit{Department of Electrical and Computer Engineering} \\
+\textit{University of British Columbia}\\
+Vancouver, Canada \\
+Student Number:  24583156}
 }
 
 \maketitle
@@ -37,7 +54,34 @@ component, formatting, style, styling, insert
 \end{IEEEkeywords}
 
 \section{Introduction}
+Digital door locks are becoming more and more common, and as they become more common, the vulnerabilities they suffer from become more and more dangerous. While digital locks are more convenient by offering a keyless entry and exit, they are susceptible to a slew of different attacks, all intended to derive the static PIN that unlocks the digital lock.
+
 \subsection{Problems with traditional keypad entry systems}
+\subsection{Evaluation}
+We conducted a usability study to evaluate and assess our new lock system in terms of five essential criteria, speed, efficiency, learnability, memorability and user preference as suggested by Jennifer Golbeck \cite{JG}. Three undergraduates from the University of British Columbia are selected to perform the user study. A series of tasks are carefully designed to simulate the normal workflow, including login, adding a new lock, generating a code, unlocking the actual lock and etc. After these tasks, users are interviewed with several questions relating to the usability performance of our prototype. From this user study, we collected valuable advice and feedback from some real users’ perspectives.
+
+The evaluation results demonstrated our digital lock provides moderately good usability as two users rated 8 out of 10 and one user rate 7 out of 10 in terms of overall usability performance. In addition, users agree our system does provide more security features and gives them more safe feelings when using our digital lock. At the same time, this study also exposes many problems and limitations of our design. For example, it cost a little bit more time (10-15 seconds on average) for a normal unlocking operation compared with the traditional keypad. Plus, some features (e.g. expiry time) are not favored by users, and some features (e.g. showing user identity in trace data) are expected to be added.
+
+
+Assuming a 4 digit access code, simple wear and tear on the keypad means that the attacker only needs to try 4! (24) combinations at most to bruteforce the PIN, cutting down the original keyspace by almost 98\% (Figure 1).
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{worn_lock.png}
+  \caption{Worn keypad exposes digits of PIN}
+  \label{fig:wornlock}
+\end{figure}
+
+More active attacks include shoulder surfing or installing inconspicuous pinhole cameras over the lock, revealing to the attacker exactly what the combination is if the victim is unaware of the attack. 
+
+Clearly, this is a security problem, one that hinges on the assumption of a static PIN code. Therefore, we seek to address this problem by dynamically and randomly generating temporary access codes for the user on demand, rather than having the lock accept a preset access code. In other words, our system will have the digital lock, by default, reject every input as invalid. Only when users request a new code through our mobile app will the lock accept the newly generated code.
+
+\subsection{Importance of Problem}
+It can be hard to quantify or estimate the value of goods protected by electronic keypad locks. We postulate that if the location is important enough to secure with an electronic keypad lock, then the user does not want the location compromised, and thus security is important to the user. 
+
+	However, these electronic keypads allow users to choose their own static access codes, and humans are wildly unsuited to coming up with random PIN codes. Analysis done on leaked 4 digit PINs from breaches or leaks found that 1234 accounted 11\% of the 3.4 million leaked codes, and the top 20 most common PINs accounted for 26.83\% of the entire 3.4 million PINS \cite{b1}.
+	
+	Clearly, users cannot be trusted to come up with secure random access codes, and thus cannot effectively protect themselves, which is an important problem that our design seeks to address.
+
 
 \subsection{Proposed Solution}
 	We designed a digital-lock system that employs the use of dynamically generated TOTP access codes instead of conventional static codes. Our system uses fingerprint biometrics for authentication as an alternative to logging in using a username and password. Fingerprint authentication has been proven to be more usable and efficient than entering a username and password \cite{b2}, minimizing the amount of effort and time required on the user’s part. Once the user is authenticated, they can then generate a TOTP for unlocking a particular digital door-lock. Upon unlocking the digital door-lock, the valid TOTP is immediately destroyed and rendered invalid. 
@@ -59,6 +103,12 @@ Passwords are considered to be one of the easiest targets for hackers. Many comp
 	One difference in our design from the Grey system is the initial set up of the lock system. In the Grey system, this initial set up is done via either Bluetooth discovery or using the phone’s camera to photograph a two-dimensional barcode. Our system instead requires the user to activate the lock via a unique serial number upon first use. In order to do so, the user has to first be logged in to an account associated with our server. Subsequent attempts to unlock the digital lock will require either user account log-in or biometric authorization. Furthermore, our system employs the use of TOTP as the challenge-response OTP mechanism. Users of the Grey system utilize static PIN codes in order to activate their individual private key for authorization. Even though the PIN code entry system is abstracted to the smartphone, it is still highly vulnerable to the same adversarial attacks such as shoulder surfing and/or social engineered attacks.
 
 \section{Adversary Model}
+To truly explore the strengths and limits of our system, we must put ourselves in the shoes of the adversary, and reason about the objective and capabilities of such an adversary.
+\subsection{Objective of Adversary}
+The adversary has the primary objective of gaining authorized access to the secured location by entering through the door secured by a digital lock. Forced entries, whether through the secured door or other entrances, are unauthorized accesses and thus outside the scope of this adversary. To achieve this, the adversary seeks the valid PIN code to the digital lock. We assume this adversary is an opportunistic burglar, who does not care about which location they break into and will target the easiest location.
+\subsection{Capabalities}
+	This adversary can install any arbitrary system on or around the digital lock that will not be noticed by the regular user, including tools such as keyloggers and pinhole cameras. Furthermore, through sleight of hand or other means, the adversary can steal the phone of the user, which has the mobile application that requests new codes installed on it. Furthermore, through social engineering, shoulder surfing, or just bruteforce, the adversary is able to unlock the user’s phone and launch the mobile application.
+
 
 \section{System Prototype}
 \section{System Design}
@@ -70,14 +120,109 @@ Moreover, adversaries may attempt to gain access to the access codes through a s
 	Finally, the main goal for our design is to provide significantly greater security of traditional digital locks while minimizing the additional inconvenience imposed on users. In order to do so, we kept our system compatible with existing digital lock systems and as small as possible in order to allow for retrofitting of our proposed design. Though more effort and time will be required on the part of the user and their device, we kept this as seamless and effortless as possible. 
 
 
+\subsection{Principles of Secure System Design}
+Our design satisfies a number of secure system design principles.
+\begin{enumerate}
+\item{Open Design: The security of our system is not based upon the secrecy of our design or implementation. Even if attackers gained access to the complete source code of our project, they would be unable to predict the next PIN code generated for any arbitrary lock from the server, and unable to gain access to any mobile application accounts to generate new PIN codes.}
+\item{
+Economy of Mechanism: The method with which we generated new PIN codes, as well as the method of communication between server/lock/application have been chosen to be as simple and small as possible.
+}
+\item{
+Complete Mediation: Every single request to the server requests authorization, and every new PIN code request on the application requires biometric confirmation before it is carried out.
+}
+\item{
+Least Privilege: Basic users can only generate new PIN codes or fetch the current existing code, and cannot add new users to be associated with their locks.
+}
+\item{
+Psychological Acceptability: The system was designed to be as seamless as possible for the user. While there will obviously be more friction than if this system did not exist, we attempted to minimize the impact on users.
+}
+\item{
+Separation Privilege: Users can only generate new pin codes if they are logged in AND have access to the lock they are trying to generate the pin code for. Thus, new pin codes are granted based on more than one condition.
+}
+\item{
+Fail-Safe Defaults: By default, locks do not have any valid access codes. By default, users do not have access to any locks until the lock administrator user grants the user access to the lock. By default, the server does not accept any incoming requests unless they are logged in and authenticated.
+}
+\end{enumerate}
+
+
 \section{System Prototype}
+
 \subsection{Hardware}
 	We used a RaspberryPi Zero W to build the prototype of our digital lock system. We connected a numeric keypad to simulate a traditional keypad door lock to provide input to the RaspberryPi. Upon entry by a user, the lock system uses the requests Python module to establish a connection with the server via HTTPS. The lock system then retrieves its own serial number and sends it along with the code entered by the user. On the server-side, the code is checked with the lock associated with the serial number. If the code is valid, the server returns a success message. Otherwise, a forbidden message is returned. The digital lock then checks the response from the server and unlocks the lock if and only if the server managed to authenticate the user’s code. On the digital lock side, communication with the server is not authenticated. This is intentional in order to allow a third-party to gain access through an authorized user. For example, a domestic cleaner (unauthorized) may be granted one-time access by a homeowner (authorized).
+\subsection{Server}
+The server acts as the central hub, accepting communications from both the digital lock and mobile application. All communications are done via HTTPS, making eavesdropping impossible. Furthermore, any requests to generate new PIN codes or access available locks must be authenticated. To this end, the server requires the mobile application to first log in and provide valid credentials, after which the server will provide a token which must be provided with every subsequent request for authentication. If a valid request is made to generate a new access code, the server uses true random number generatino to generate a new code, tag it with the requested expiry time, and returns the code to the client.
+
+\subsection{Mobile}
+There are two main activities in the Android application. The first one is login activity. Like most of the login system, the login activity help server authenticates the user by their email and password. In the real system, this activity also provides the functionalities to register, reset password and validate clients’ email. For prototype, we only provide a simple login and register interface to simulate this process for the reason that this is a necessary but not the central part of our smart lock system.
+
+Once a user logs in, the token of the response from the server would be stored in users’ phones’ memory for subsequent API calls. And UI will switch to the main activity, where some lock information will be shown in figure~\ref{fig:mainActivity}.
+
+\begin{figure*}[h]
+\centerline{\includegraphics[width=\textwidth]{img/MainActivity.png}}
+\caption{Main activity user interface of Android application}
+\label{fig:mainActivity}
+\end{figure*}
+
+As you can see from this interface, users can easily switch to other locks by clicking the dropdown arrow. All lock names will be shown and the last row item is “Add new Lock” label where users can add a new lock by providing any necessary information to prove his or her ownership for the new lock. Once the user successfully added the new lock by clicking that item, its user-defined name will be shown in the dropdown. For the newly added lock, a closed lock icon is displayed to indicate there is not any valid code for this lock right now. Thus, users are expected to click the code generation button to generate a new code for the selected lock. Once the button is clicked, a dialogue will pop up to let the user pick the expiry date for the code, and the date picker is initiated to be one minute later than the current users’ local time by default. When users confirm the expiry date, the biometrics authentication will be triggered. Once users are authenticated, the new code generated by the server will be displayed to users in the code display area. And the remaining time label below will remind users how long this code remains valid. 
+
 
 \section{Evaluation}
-\newpage
-ajaj
-\newpage
+\subsection{Evaluation Methodology}
+We perform usability studies to evaluate the usability of our system. First, three UBC undergraduates are invited to perform the study. They all have Computer Science or engineering related backgrounds and had experience of using normal keypad lock. They all learned sufficient knowledge about security and system design during their undergraduate study, which could give us more technical advice from a professional perspective.  A series of carefully designed tasks will be assigned to them, and after finishing the tasks, we will interview them individually to get some objective feedback for our smart lock prototype.
+
+All tasks are designed to simulate the real user workflow in the real world. First, each user will download our Android application on their own Android phones (or we gave them a sample Android phone if they do not have one). Then, they will log in to our system using the test account we give to them. Second, after users have logged in, they are required to register the test lock using the lock information provided to them. In this process, users will figure out how to add locks in our Android application. Third, users are asked to generate the code for the test lock and using the code they generated to unlock the test lock, which is also the core functionalities of our prototype. We also repeated this task three times and recorded the time consumed to assess the speed properties of our system.  Finally, we let users generate a code with a short lifetime (e.g. one-minute expiry time) and unlock the lock once the code is expired. After this task, users will have a better understanding of how the design of the expiry time of our system works.
+The digital lock will only send its own serial number and the code it received to the server. This is the only action on the server that does not require authentication. Upon receiving a valid code, the server immediately marks the code as invalid, rendering any subsequent requests with the same code invalid as well. The only viable attack against this would be to constantly bombard the server with every 4 digit PIN between 0000 and 9999, thus denying everyone access. This could be easily mitigated by limiting the number of requests the server takes from the same IP address. Furthermore, denial of access is against the interest of our adversary model, who wishes to enter the location.
+After users finished their tasks, several questions will be interviewed to them for assessing our system. First, we let the user rate our prototype in terms of ease of use on a scale of 1 to 10. Then, we asked them to compare and contrast our smart lock with traditional keypad lock.  Finally, users are asked to give constructive suggestions for our system.
+
+\subsection{Study Results}
+All three users successfully completed the tasks, although there were some small issues happened. User A had connection issues during login, but she succeeded in the second try. User C failed to unlock the lock using the generated code in the first time, the error response showed the code is expired, however, he tried to generate a new code and passed the authentication. User B did not have any issues and finished his tasks smoothly. The total time three users used to generate the code and unlock the door is shown in table~\ref{tab:time}.
+
+\begin{table}[htbp]
+\caption{Total time users consumed to unlock the lock}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{User}&\textbf{A}&\textbf{B}&\textbf{C} \\
+\hline
+\textbf{1st Attempt} & \textbf{22s} & \textbf{20s} & \textbf{Failed (expired code)} \\
+\hline
+\textbf{2nd Attempt} & \textbf{17s} & \textbf{15s} & \textbf{19s} \\
+\hline
+\textbf{3rd Attempt} & \textbf{12s} & \textbf{13s} & \textbf{15s}  \\
+\hline
+\end{tabular}
+\label{tab:time}
+\end{center}
+\end{table}
+Regarding the first interviewed question, the results are shown in table~\ref{tab:rate}
+
+\begin{table}[htbp]
+\caption{Rates of overall usabilities given by three users}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{User}&\textbf{A}&\textbf{B}&\textbf{C} \\
+\hline
+\textbf{Rate (out of 10)} & \textbf{8} & \textbf{7} & \textbf{7} \\
+\hline
+\end{tabular}
+\label{tab:rate}
+\end{center}
+\end{table}
+For the second question, user A believed she felt more secure when using our smart lock system since the code is one-time use with expiry time, while student B thought that although it is more secure than the traditional keypad lock, our system has reduced usability, because he only needs inputs four-digit number to unlock the door previously, whereas, he has to check his phone and use biometric to generate the code. User C has a similar opinion as user B and he also added that he will prefer to use traditional keypad lock unless our prototype has easier and simple user workflow.
+
+For the third problem, both users A and C think setting expiry time for the code seems unnecessary and redundant, instead, they prefer a default expiry time. User B mentioned he wants to know who consumed the code to open the door other than when the code was used in log area of the main activity of the app.
+
+\subsection{Discussion of the evaluation results}
+Overall, the results show our prototype is still usable as the rate shown in table 2, two users give 7 out 10 while one user gave 8 points but this study also exposes many problems and limitations of our design. We will talk about the usability of our system according to five factors, speed, efficiency (Security mistake), learnability, memorability and user preference.
+In terms of the speed properties, as the results listed from the table, users approximately cost 12-15 seconds on average to unlock. While the time length for authentication is not too long, it obviously reduces the speed properties compared with traditional keypad locks. However, some actions can be taken to accelerate this process. For instance, as suggested by user A and user C, we could remove the part of setting expiry time when users try to generate the code and using default expiry time instead. Meanwhile, we sacrificed the flexibility that users could set any expiry time they want.
+
+The efficiency of our system is satisfying overall. All users did not get confused and make too many mistakes when they are performing the tasks, except some small issues do happen. Our Android application could be improved to provide a smoother user experience. For example, when once the user login, our Android app could remember the user’s identity so that users do not have to login again for a while. In addition, connection issues can be reduced by improving the performance of the server.
+
+The learnability of our system can be demonstrated in table 1, as you can see users used less time to complete the authentication to unlock when they had a second or third attempt. This proved that our system is straightforward and easy to use, implying memorability also reach the standard. Users do not have to memorize anything except checking their phones to unlock the door.
+
+Finally, regarding user preference, on the one hand, users believed our system does provide more security features, such as login, biometric authentication and one-time door code, etc. On the other hand, users complain about some other features. Other than the expiry time feature mentioned before, users like to see more traceable data such as those who unlock the door. However, this is a big challenge with our current design because it is hard to identify who unlock the door based on four random-generated digits he or she input but it is easier to tell the user when the lock was unlocked. Some of our members proposed to use four-digit number inserted before the actual code as user identity number. Nevertheless, it is a bad design since users need to remember and press more digits than before.
+
 \section{Discussion}
 In this section, we will discuss the advantages and benfits of our system prototype and its broader design.
 We will then examine its limitations and disadvantages.
@@ -136,6 +281,10 @@ However it is, of course, more inconvenient to use our system over a traditional
 We believe that the compromise is likely to be accepted by the majority of security-conscious consumers, as well as many large corporations currently utilizing keypad door locks.
 Corporations pose signficant potential customers for this kind of system, as the value of assets protected by access control systems can be massive, and the traceability offered by a system such as ours would be very useful when many different people might need access at different times.
 
+
+
+\section{Discussion}
+
 \section{Conclusion}
 
 % \begin{table}[htbp]
@@ -184,14 +333,22 @@ Corporations pose signficant potential customers for this kind of system, as the
 % citation first, followed by the original foreign-language citation \cite{b6}.
 
 \begin{thebibliography}{00}
-\bibitem{b2} G D Lam, “Evaluating the Usability of an Apple Touch ID-Based Access Control System” University of British Columbia, April 2015.
-\bibitem{b3} L. Bauer, S. Garriss, J. M. Mccune, M. K. Reiter, J. Rouse, and P. Rutenbar, “Device-Enabled Authorization in the Grey System,” Jan. 2005.
-\bibitem{b4} D. Choi, W. Kim and D. Won, “One-Time Password Technology Analysis and Standardization Trend,” Review of KIISC, vol. 17,no. 3, pp. 12-17, Jun. 2007.
-\bibitem{b5} S. Seo and W. Kang, “OTP Technology Status and OTP Introduction Example,” Review of KIISC, vol. 17, no. 3, pp. 18-25, Jun. 2007.
-\bibitem{b6} ”RFC 4226 - HOTP: An HMAC-Based One-Time Password Algorithm”, Tools.ietf.org, 2016. [Online]. Available: https://tools.ietf.org/html/rfc4226. [Accessed: 05- Dec- 2019].
-\bibitem{b7} ”RFC 6238 - TOTP: Time-based One-time Password Algorithm”, Tools.ietf.org, 2016. [Online]. Available: https://tools.ietf.org/html/rfc6238. [Accessed: 05- Dec- 2019].
-\bibitem{b8} A. W. Appel and E. W. Felten. Proof-carrying authentication. In Proc. 6th ACM Conference on Computer and Communications Security, Nov. 1999.
-\bibitem{b9} L. Bauer, S. Garriss, and M. K. Reiter. Distributed proving in access-control systems. In Proc. 2005 IEEE Symposium on Security and Privacy, May 2005.
+\bibitem{ab2} G D Lam, “Evaluating the Usability of an Apple Touch ID-Based Access Control System” University of British Columbia, April 2015.
+\bibitem{ab3} L. Bauer, S. Garriss, J. M. Mccune, M. K. Reiter, J. Rouse, and P. Rutenbar, “Device-Enabled Authorization in the Grey System,” Jan. 2005.
+\bibitem{ab4} D. Choi, W. Kim and D. Won, “One-Time Password Technology Analysis and Standardization Trend,” Review of KIISC, vol. 17,no. 3, pp. 12-17, Jun. 2007.
+\bibitem{ab5} S. Seo and W. Kang, “OTP Technology Status and OTP Introduction Example,” Review of KIISC, vol. 17, no. 3, pp. 18-25, Jun. 2007.
+\bibitem{ab6} ”RFC 4226 - HOTP: An HMAC-Based One-Time Password Algorithm”, Tools.ietf.org, 2016. [Online]. Available: https://tools.ietf.org/html/rfc4226. [Accessed: 05- Dec- 2019].
+\bibitem{ab7} ”RFC 6238 - TOTP: Time-based One-time Password Algorithm”, Tools.ietf.org, 2016. [Online]. Available: https://tools.ietf.org/html/rfc6238. [Accessed: 05- Dec- 2019].
+\bibitem{ab8} A. W. Appel and E. W. Felten. Proof-carrying authentication. In Proc. 6th ACM Conference on Computer and Communications Security, Nov. 1999.
+\bibitem{ab9} L. Bauer, S. Garriss, and M. K. Reiter. Distributed proving in access-control systems. In Proc. 2005 IEEE Symposium on Security and Privacy, May 2005.
+\bibitem{JG}J. Golbeck, “Usable Security,” Open CSF: Open Computer Science Foundations, 01-Aug-2016. [Online]. Available: https://www.youtube.com/watch?v=O4QbOFDUVao. [Accessed: 04-Dec-2019].
+\bibitem{b1} Unknown author, ``Pin Analyis,'', Data Genetics, http://www.datagenetics.com/blog/september32012/.
+\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
+\bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
+\bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
+\bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
+\bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
+\bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
 \bibitem{bben1} Weir, C.S., Douglas, G., Carruthers, M. and Jack, M., 2009. User perceptions of security, convenience and usability for ebanking authentication tokens. Computers \& Security, 28(1-2), abstract.
 \end{thebibliography}
 \end{document}
