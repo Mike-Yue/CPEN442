@@ -56,10 +56,9 @@ Mike Yue developed the server code and Austine Yapp produced the software for th
 
 \section{Evaluation}
 \newpage
+ajaj
+\newpage
 \section{Discussion}
-\textbf{Discuss pros and cons of your design, as well as limitations and advantages of it. This discussion should integrate the related work, the motivation for the design, the adversary model, the ideas of the design, and the results of the evaluation. This section should be about one page.}
-\newline
-
 In this section, we will discuss the advantages and benfits of our system prototype and its broader design.
 We will then examine its limitations and disadvantages.
 Finally, we will consider the findings of our project overall, with these aforementioned `pros' and `cons' in mind.
@@ -90,15 +89,32 @@ The other mitigation of this kind of attack relies on the expiry time of the sin
 A sophisticated attack could have another adversary located closer to the door, but this level of organization is uncharacteristic for an oppourtunistic threat agent.
 
 \subsection{Limitations}
-
 As mentioned before, the phsycial security of our prototype device was out of scope for this project, but would be an important part of the design if we wanted to bring a product like this to market.
 Our prototype, however, did suffer from a few limitations which impeded both security and usability.
 
+An auto-login feature would greatly improve user effiency, and would not impair security significantly, as biometrics would still be needed to generate a code.
+This enhancement to the mobile application could easily half the time needed to generate a code in the app, as currently the app will force a user to log in manually if it has not been opened recently (if the activity has not yet been started or has been killed by android).
+Currently, this limitation significantly impairs the user experience of using our entire system, as typing a username and password is not only a time consuming acitivity, but a fairly difficult and precise process.
+Most users would have to stand still in order to do this, which is frustrating for a potential user.
+With an auto-login feature no precise actions are required, meaning a user could generate a code as they walk up to the door and would only have to stop to type in the code --- the same as a traditional keypad lock.
 
+Somewhat counter-intuitively, it would increase the overall security of the system to remove the ability of users to manually set the expiry time of codes.
+The current behavior limits the effectiveness of the TOTP codes and encourages users to generate codes ahead of time, making the system much less secure.
+This would force codes to always expire after a certain, short, amount of time (eg two minutes); which would force users to only generate codes when they intent to use them immediately.
+Another benefit of this change would be that the speed of generating a code would improve, as it would be another step that the user would not have to do.
+
+Another significant limitation of our design is that a planned `failure mode' was not integrated. This is where the lock would accept a more secure (eight digits) long-term code to unlock if the user was to not have access to their phone.
+This was not implemtned into our prototype due to the additional development effort that would be needed
+It does, also, pose a signficant security issue --- as it subverts a signficant amount of the security design in the core product.
+We demed that it would be neccesairy in a commercial product but did not resolve the challenges associated with designing such a protocol, essentiall making it easy for the legitimate users while keeping the lock secure.
+This would be a great avenue for future research.
 
 \subsection{Overall Findings}
+Overall, we found that security was significantly increased by using our system in place of a traditional keypad lock, when using our defined adversary model.
+However it is, of course, more inconvenient to use our system over a traditional keypad-based access control system. 
 
-
+We believe that the compromise is likely to be accepted by the majority of security-conscious consumers, as well as many large corporations currently utilizing keypad door locks.
+Corporations pose signficant potential customers for this kind of system, as the value of assets protected by access control systems can be massive, and the traceability offered by a system such as ours would be very useful when many different people might need access at different times.
 
 \section{Conclusion}
 
