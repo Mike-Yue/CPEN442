@@ -37,7 +37,29 @@ component, formatting, style, styling, insert
 \end{IEEEkeywords}
 
 \section{Introduction}
+Digital door locks are becoming more and more common, and as they become more common, the vulnerabilities they suffer from become more and more dangerous. While digital locks are more convenient by offering a keyless entry and exit, they are susceptible to a slew of different attacks, all intended to derive the static PIN that unlocks the digital lock.
+
 \subsection{Problems with traditional keypad entry systems}
+
+Assuming a 4 digit access code, simple wear and tear on the keypad means that the attacker only needs to try 4! (24) combinations at most to bruteforce the PIN, cutting down the original keyspace by almost 98\% (Figure 1).
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{worn_lock.png}
+  \caption{Worn keypad exposes digits of PIN}
+  \label{fig:wornlock}
+\end{figure}
+
+More active attacks include shoulder surfing or installing inconspicuous pinhole cameras over the lock, revealing to the attacker exactly what the combination is if the victim is unaware of the attack. 
+
+Clearly, this is a security problem, one that hinges on the assumption of a static PIN code. Therefore, we seek to address this problem by dynamically and randomly generating temporary access codes for the user on demand, rather than having the lock accept a preset access code. In other words, our system will have the digital lock, by default, reject every input as invalid. Only when users request a new code through our mobile app will the lock accept the newly generated code.
+
+\subsection{Importance of Problem}
+It can be hard to quantify or estimate the value of goods protected by electronic keypad locks. We postulate that if the location is important enough to secure with an electronic keypad lock, then the user does not want the location compromised, and thus security is important to the user. 
+
+	However, these electronic keypads allow users to choose their own static access codes, and humans are wildly unsuited to coming up with random PIN codes. Analysis done on leaked 4 digit PINs from breaches or leaks found that 1234 accounted 11\% of the 3.4 million leaked codes, and the top 20 most common PINs accounted for 26.83\% of the entire 3.4 million PINS \cite{b1}.
+	
+	Clearly, users cannot be trusted to come up with secure random access codes, and thus cannot effectively protect themselves, which is an important problem that our design seeks to address.
+
 
 \subsection{Proposed Solution}
 
@@ -49,10 +71,46 @@ Mike Yue developed the server code and Austine Yapp produced the software for th
 \section{Related Work}
 
 \section{Adversary Model}
+To truly explore the strengths and limits of our system, we must put ourselves in the shoes of the adversary, and reason about the objective and capabilities of such an adversary.
+\subsection{Objective of Adversary}
+The adversary has the primary objective of gaining authorized access to the secured location by entering through the door secured by a digital lock. Forced entries, whether through the secured door or other entrances, are unauthorized accesses and thus outside the scope of this adversary. To achieve this, the adversary seeks the valid PIN code to the digital lock. We assume this adversary is an opportunistic burglar, who does not care about which location they break into and will target the easiest location.
+\subsection{Capabalities}
+	This adversary can install any arbitrary system on or around the digital lock that will not be noticed by the regular user, including tools such as keyloggers and pinhole cameras. Furthermore, through sleight of hand or other means, the adversary can steal the phone of the user, which has the mobile application that requests new codes installed on it. Furthermore, through social engineering, shoulder surfing, or just bruteforce, the adversary is able to unlock the user’s phone and launch the mobile application.
+
 
 \section{System Design}
 
+\subsection{Principles of Secure System Design}
+Our design satisfies a number of secure system design principles.
+\begin{enumerate}
+\item{Open Design: The security of our system is not based upon the secrecy of our design or implementation. Even if attackers gained access to the complete source code of our project, they would be unable to predict the next PIN code generated for any arbitrary lock from the server, and unable to gain access to any mobile application accounts to generate new PIN codes.}
+\item{
+Economy of Mechanism: The method with which we generated new PIN codes, as well as the method of communication between server/lock/application have been chosen to be as simple and small as possible.
+}
+\item{
+Complete Mediation: Every single request to the server requests authorization, and every new PIN code request on the application requires biometric confirmation before it is carried out.
+}
+\item{
+Least Privilege: Basic users can only generate new PIN codes or fetch the current existing code, and cannot add new users to be associated with their locks.
+}
+\item{
+Psychological Acceptability: The system was designed to be as seamless as possible for the user. While there will obviously be more friction than if this system did not exist, we attempted to minimize the impact on users.
+}
+\item{
+Separation Privilege: Users can only generate new pin codes if they are logged in AND have access to the lock they are trying to generate the pin code for. Thus, new pin codes are granted based on more than one condition.
+}
+\item{
+Fail-Safe Defaults: By default, locks do not have any valid access codes. By default, users do not have access to any locks until the lock administrator user grants the user access to the lock. By default, the server does not accept any incoming requests unless they are logged in and authenticated.
+}
+\end{enumerate}
+
+
 \section{System Prototype}
+\subsection{Server}
+The server acts as the central hub, accepting communications from both the digital lock and mobile application. All communications are done via HTTPS, making eavesdropping impossible. Furthermore, any requests to generate new PIN codes or access available locks must be authenticated. To this end, the server requires the mobile application to first log in and provide valid credentials, after which the server will provide a token which must be provided with every subsequent request for authentication. If a valid request is made to generate a new access code, the server uses true random number generatino to generate a new code, tag it with the requested expiry time, and returns the code to the client.
+
+The digital lock will only send its own serial number and the code it received to the server. This is the only action on the server that does not require authentication. Upon receiving a valid code, the server immediately marks the code as invalid, rendering any subsequent requests with the same code invalid as well. The only viable attack against this would be to constantly bombard the server with every 4 digit PIN between 0000 and 9999, thus denying everyone access. This could be easily mitigated by limiting the number of requests the server takes from the same IP address. Furthermore, denial of access is against the interest of our adversary model, who wishes to enter the location.
+
 
 \section{Evaluation}
 
@@ -122,7 +180,7 @@ For papers published in translation journals, please give the English
 citation first, followed by the original foreign-language citation \cite{b6}.
 
 \begin{thebibliography}{00}
-\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
+\bibitem{b1} Unknown author, ``Pin Analyis,'', Data Genetics, http://www.datagenetics.com/blog/september32012/.
 \bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
 \bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
 \bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
