@@ -54,14 +54,10 @@ component, formatting, style, styling, insert
 \end{IEEEkeywords}
 
 \section{Introduction}
+
+\subsection{Addressed Problem}
+
 Digital door locks are becoming more and more common, and as they become more common, the vulnerabilities they suffer from become more and more dangerous. While digital locks are more convenient by offering a keyless entry and exit, they are susceptible to a slew of different attacks, all intended to derive the static PIN that unlocks the digital lock.
-
-\subsection{Problems with traditional keypad entry systems}
-\subsection{Evaluation}
-We conducted a usability study to evaluate and assess our new lock system in terms of five essential criteria, speed, efficiency, learnability, memorability and user preference as suggested by Jennifer Golbeck \cite{JG}. Three undergraduates from the University of British Columbia are selected to perform the user study. A series of tasks are carefully designed to simulate the normal workflow, including login, adding a new lock, generating a code, unlocking the actual lock and etc. After these tasks, users are interviewed with several questions relating to the usability performance of our prototype. From this user study, we collected valuable advice and feedback from some real users’ perspectives.
-
-The evaluation results demonstrated our digital lock provides moderately good usability as two users rated 8 out of 10 and one user rate 7 out of 10 in terms of overall usability performance. In addition, users agree our system does provide more security features and gives them more safe feelings when using our digital lock. At the same time, this study also exposes many problems and limitations of our design. For example, it cost a little bit more time (10-15 seconds on average) for a normal unlocking operation compared with the traditional keypad. Plus, some features (e.g. expiry time) are not favored by users, and some features (e.g. showing user identity in trace data) are expected to be added.
-
 
 Assuming a 4 digit access code, simple wear and tear on the keypad means that the attacker only needs to try 4! (24) combinations at most to bruteforce the PIN, cutting down the original keyspace by almost 98\% (Figure 1).
 
@@ -82,10 +78,16 @@ It can be hard to quantify or estimate the value of goods protected by electroni
 	
 	Clearly, users cannot be trusted to come up with secure random access codes, and thus cannot effectively protect themselves, which is an important problem that our design seeks to address.
 
-
 \subsection{Proposed Solution}
 	We designed a digital-lock system that employs the use of dynamically generated TOTP access codes instead of conventional static codes. Our system uses fingerprint biometrics for authentication as an alternative to logging in using a username and password. Fingerprint authentication has been proven to be more usable and efficient than entering a username and password \cite{ab2}, minimizing the amount of effort and time required on the user’s part. Once the user is authenticated, they can then generate a TOTP for unlocking a particular digital door-lock. Upon unlocking the digital door-lock, the valid TOTP is immediately destroyed and rendered invalid. 
 	There has been similar work done by CMU on the Grey system \cite{ab3}, a device-enabled authorization system utilizing smartphones to unify access controls. However, the system still utilizes a static PIN code in order to activate a user’s private key for authentication. This leaves the system still highly vulnerable to adversarial attacks such as shoulder surfing. Our proposed system thus hopes to remove the need for static PIN codes through TOTP dynamic PIN codes. 
+
+\subsection{Evaluation}
+We conducted a usability study to evaluate and assess our new lock system in terms of five essential criteria, speed, efficiency, learnability, memorability and user preference as suggested by Jennifer Golbeck \cite{JG}. Three undergraduates from the University of British Columbia are selected to perform the user study. A series of tasks are carefully designed to simulate the normal workflow, including login, adding a new lock, generating a code, unlocking the actual lock and etc. After these tasks, users are interviewed with several questions relating to the usability performance of our prototype. From this user study, we collected valuable advice and feedback from some real users’ perspectives.
+
+The evaluation results demonstrated our digital lock provides moderately good usability as two users rated 8 out of 10 and one user rate 7 out of 10 in terms of overall usability performance. In addition, users agree our system does provide more security features and gives them more safe feelings when using our digital lock. At the same time, this study also exposes many problems and limitations of our design. For example, it cost a little bit more time (10-15 seconds on average) for a normal unlocking operation compared with the traditional keypad. Plus, some features (e.g. expiry time) are not favored by users, and some features (e.g. showing user identity in trace data) are expected to be added.
+
+\subsection{Summarized Conclusion}
 
 \subsection{Contributions}
 The work on the prototype was split naturally over the three components --- The mobile application, server application and code which would run on the actual lock hardware.
@@ -110,7 +112,6 @@ The adversary has the primary objective of gaining authorized access to the secu
 	This adversary can install any arbitrary system on or around the digital lock that will not be noticed by the regular user, including tools such as keyloggers and pinhole cameras. Furthermore, through sleight of hand or other means, the adversary can steal the phone of the user, which has the mobile application that requests new codes installed on it. Furthermore, through social engineering, shoulder surfing, or just bruteforce, the adversary is able to unlock the user’s phone and launch the mobile application.
 
 
-\section{System Prototype}
 \section{System Design}
 \subsection{Overview}
 	Instead of a static pin code, we use a dynamically-generated TOTP access code. First, the user must authenticate themselves using their mobile device’s fingerprint scanner to unlock the device’s unique fingerprint secret which was generated when the application was first started. Next, the application sends the fingerprint secret to the server for authentication. The server then sends the list of authorized locks for the user to unlock. Upon selecting a particular lock, the server generates a valid TOTP code associated with that lock, and this code is sent to the user through the mobile app. TOTP is an extension of the HOTP algorithm that uses a secret shared key and the current timestamp as inputs to a cryptographic HMAC hash function. User input in the lock is then sent to the server and verified on the server-side. If the code entered is valid, the server returns a success message and unlocks the lock. Otherwise, the server returns a forbidden message and the lock remains unlocked.
@@ -282,8 +283,6 @@ We believe that the compromise is likely to be accepted by the majority of secur
 Corporations pose signficant potential customers for this kind of system, as the value of assets protected by access control systems can be massive, and the traceability offered by a system such as ours would be very useful when many different people might need access at different times.
 
 
-
-\section{Discussion}
 
 \section{Conclusion}
 
