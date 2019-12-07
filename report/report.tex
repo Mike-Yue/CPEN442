@@ -44,20 +44,15 @@ Student Number:  24583156}
 \maketitle
 
 \begin{abstract}
-This document is a model and instructions for \LaTeX.
-This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.]. *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes, 
-or Math in Paper Title or Abstract.
+This paper seeks to address the problems that plague conventional digital door locks. A security study was first done, highlighting the innate vulnerabilities of a traditional static PIN entry system such as the opportunity of using replay attacks through shoulder-surfing in order to gain unauthorized access. Our proposed solution uses dynamic, randomly generated Time-Based One-Time Password (TOTP) together with user fingerprint biometrics to generate a single-use PIN. A three-part prototype system was designed to demonstrate the increased authentication security for a typical use case scenario. User convenience and psychological acceptance too were key considerations in our design. The system was then evaluated in usability studies in order to access its overall effectiveness. For the prototype, the implementation was split into three parts: server-side (Mike), mobile application (Ben and Scott) and digital lock hardware (Austine).
 \end{abstract}
 
-\begin{IEEEkeywords}
-component, formatting, style, styling, insert
-\end{IEEEkeywords}
 
 \section{Introduction}
+
+\subsection{Addressed Problem}
 Digital keypad door locks already protect many homes and businesses, and their usage is rising due to their decreasing cost and enhanced security and convenience. However, as their popularity increases, their vulnerabilities have the potential to affect more users. While the keyless entry and exit provided by keypad locks is convenient, it also means they are susceptible to a slew of different attacks, all intended to derive the static PIN that unlocks the digital lock.
 
-\subsection{Problems with traditional keypad entry systems}
- 
 Assuming a 4 digit access code, simple wear and tear on the keypad means that the attacker only needs to try 4! (24) combinations at most to bruteforce the PIN, cutting down the original keyspace by almost 98\% (Figure 1).
 
 \begin{figure}[h!]
@@ -77,8 +72,6 @@ It can be hard to quantify or estimate the value of goods protected by electroni
 	
 	Clearly, users cannot be trusted to come up with secure random access codes, and thus cannot effectively protect themselves, which is an important problem that our design seeks to address.
 
-
-\subsection{Proposed Solution}
 	We designed a digital-lock system that employs the use of dynamically generated TOTP access codes instead of conventional static codes. Our system uses fingerprint biometrics for authentication as an alternative to logging in using a username and password. Fingerprint authentication has been proven to be more usable and efficient than entering a username and password \cite{b2}, minimizing the amount of effort and time required on the user’s part. Once the user is authenticated, they can then generate a TOTP for unlocking a particular digital door-lock. Upon unlocking the digital door-lock, the valid TOTP is immediately destroyed and rendered invalid. 
 	There has been similar work done by CMU on the Grey system \cite{b3}, a device-enabled authorization system utilizing smartphones to unify access controls. However, the system still utilizes a static PIN code in order to activate a user’s private key for authentication. This leaves the system still highly vulnerable to adversarial attacks such as shoulder surfing. Our proposed system thus hopes to remove the need for static PIN codes through TOTP dynamic PIN codes. 
 	
@@ -86,6 +79,8 @@ It can be hard to quantify or estimate the value of goods protected by electroni
 We conducted a usability study to evaluate and assess our new lock system in terms of five essential criteria: speed, efficiency, learnability, memorability and user preference, as suggested by Jennifer Golbeck \cite{JG}. Three undergraduates from the University of British Columbia were selected to perform the user study. A series of tasks were carefully designed to simulate the normal user journey. This included login, adding a new lock, generating a code, and physically unlocking the lock. After these tasks, the users were interviewed with several questions relating to the ease of use of our prototype. From this study, we collected valuable advice and feedback from some real users’ perspectives.
 
 The evaluation results demonstrated our digital lock prototype was popular with our users in terms of overall ergonomics and intuitive design features. Two of the three users gave an eight out of ten rating and the other user gave a seven out of ten. In addition, users agreed our system provides more security features and expressed an enhanced feeling of safety when using our digital lock. However, this study also exposed a few problems and limitations of our design. For example, it took a little bit more time (10-15 seconds on average) for a normal unlocking operation to be completed compared with the traditional keypad. Additionally, users felt that the ability to change the expiry time of the one-time code somewhat compromised the system's security. Finally, the user study highlighted the need for additional features, such as showing the user identity in trace data (usage logs).
+
+\subsection{Summarized Conclusion}
 
 \subsection{Contributions}
 The work on the prototype was split naturally over the three components --- the mobile application, server application and code which would run on the actual lock hardware.
@@ -103,6 +98,7 @@ Passwords are considered to be one of the easiest targets for hackers. Many comp
 	One similar system is the Grey system at CMU which proposes the utilization of “smartphones” for unifying access control to both physical (e.g. doors, safes) and virtual (e.g. files, accounts) resources. The Grey system suggests the use of smartphones as the central agent through which access control is managed. This is because of their extensive use throughout society, as well as the hardware capabilities present that enable applications to take full advantage of the rich computation, communication, and interface capabilities. It employs proof-carrying authorization (PCA) \cite{ab8} extended with a new distributed proving technique with considerable efficiency improvements \cite{ab9}. 
 	
 	Our design is similar to this in the fact that both our systems utilize smartphones for client-side authentication. Also, both designs are intended to conveniently authorize access to other people. 
+
 	One difference in our design from the Grey system is the initial set up of the lock system. In the Grey system, this initial set up is done via either Bluetooth discovery or using the phone’s camera to photograph a two-dimensional barcode. Our system instead requires the user to activate the lock via a unique serial number upon first use. In order to do so, the user has to first be logged in to an account associated with our server. Subsequent attempts to unlock the digital lock will require either user account log-in or biometric authorization. Furthermore, our system employs the use of TOTP as the challenge-response OTP mechanism. Users of the Grey system utilize static PIN codes in order to activate their individual private key for authorization. Even though the PIN code entry system is abstracted to the smartphone, it is still highly vulnerable to the same adversarial attacks such as shoulder surfing and/or social engineered attacks.
 
 \section{Adversary Model}
@@ -113,6 +109,7 @@ The adversary has the primary objective of gaining authorized access to the secu
 	This adversary can install any arbitrary system on or around the digital lock that will not be noticed by the regular user, including tools such as keyloggers and pinhole cameras. Furthermore, through sleight of hand or other means, the adversary can steal the phone of the user, which has the mobile application that requests new codes installed on it. Furthermore, through social engineering, shoulder surfing, or just bruteforce, the adversary is able to unlock the user’s phone and launch the mobile application.
 
 \section{System Design}
+
 \subsection{Overview}
 	Instead of a static pin code, we use a dynamically-generated TOTP access code. First, the user must authenticate themselves using their mobile device’s fingerprint scanner to unlock the device’s unique fingerprint secret which was generated when the application was first started. Next, the application sends the fingerprint secret to the server for authentication. The server then sends the list of authorized locks for the user to unlock. Upon selecting a particular lock, the server generates a valid TOTP code associated with that lock, and this code is sent to the user through the mobile app. TOTP is an extension of the HOTP algorithm that uses a secret shared key and the current timestamp as inputs to a cryptographic HMAC hash function. User input in the lock is then sent to the server and verified on the server-side. If the code entered is valid, the server returns a success message and unlocks the lock. Otherwise, the server returns a forbidden message and the lock remains unlocked.
 	
@@ -290,8 +287,6 @@ We believe that the compromise is likely to be accepted by the majority of secur
 Corporations pose signficant potential customers for this kind of system, as the value of assets protected by access control systems can be massive, and the traceability offered by a system such as ours would be very useful when many different people might need access at different times.
 
 
-
-\section{Discussion}
 
 \section{Conclusion}
 
