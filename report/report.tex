@@ -229,54 +229,56 @@ The learnability of our system can be demonstrated in table 1, as you can see us
 Finally, regarding user preference, on the one hand, users believed our system does provide more security features, such as login, biometric authentication and one-time door code, etc. On the other hand, users complain about some other features. Other than the expiry time feature mentioned before, users like to see more traceable data such as those who unlock the door. However, this is a big challenge with our current design because it is hard to identify who unlock the door based on four random-generated digits he or she input but it is easier to tell the user when the lock was unlocked. Some of our members proposed to use four-digit number inserted before the actual code as user identity number. Nevertheless, it is a bad design since users need to remember and press more digits than before.
 
 \section{Discussion}
-In this section, we will discuss the advantages and benfits of our system prototype and its broader design.
+In this section, we will discuss the advantages and benefits of our system prototype and its broader design.
 We will then examine its limitations and disadvantages.
 Finally, we will consider the findings of our project overall, with these aforementioned `pros' and `cons' in mind.
 
 Our prototype system is complete enough for us to draw useful conclusions about a similar potential product but is by no means a complete system in of itself.
 The simple design allowed the development team to produce an MVP (Minimum Viable Product) and then iterate on this initial product to build our prototype system.
 Fundamentally, our system only comprises a subset of the hardware needed for an electronic door lock, namely the authentication and control electronics.
-Many non-core processes have been omitted from our prototype, namely a secure lock enrollment method and a full logging system.
+Many non-core processes have been omitted from our prototype, namely a secure lock enrolment method and a full logging system.
 Although our prototype was missing these features, we were still able to collect significant data about the usability of this kind of system, which could easily be incorporated into a future commercial security device.
 
-\subsection{Advantages}
 User testing showed that users appreciated the clear security benefits of our system but did find it to be a slight inconvenience.
 The trade-off of security and convenience is a core problem when designing security products for use by the general public; users will be hesitant to opt-in to enhanced security measures if they deem it to be a significant inconvenience.
-It has been shown that almost two-thirds of users will select the least secure and most convenienent security option if given the choice \cite{bben1}.
-Our system seeked to strike a good balance between the extra security benefits of TOTP codes and the convenience of a numeric keypad lock.
+It has been shown that almost two-thirds of users will select the least secure and most convenient security option if given the choice \cite{bben1}.
+Our system sought to strike a good balance between the extra security benefits of TOTP codes and the convenience of a numeric keypad lock.
 
-All types of shoulder-surfing and replay attacks are completely defeated by our device, meaning that there aren't many possible `subtle' (ie non-destructive) attacks against our system.
+\subsection{Advantages}
+
+A major advantage of our system is the enhanced security it provides. It completely defeats all types of shoulder-surfing and replay attacks, meaning that there aren't many possible `subtle' (ie non-destructive) attacks against our system.
 However, it is worth noting that the Wi-Fi connected electronics, mobile application and server are all attack surfaces not present in standard keypad-operated access control systems.
 Overall risk incurred by the device is therefore reduced, as the vulnerability value is significantly decreased.
 
-Given our adversay model, our device successfully resists most known capabilities, such as replay attacks with pinhole cameras.
-The adversary model does also assume that they would be able to gain access to the user's phone using a social engineering attack, and given access to the phone it is possible that the adverary would be able to comprimise the system.
+Given our adversary model, our device successfully resists most known capabilities, such as replay attacks with pinhole cameras.
+The adversary model does also assume that they would be able to gain access to the user's phone using a social engineering attack, and given access to the phone it is possible that the adversary would be able to compromise the system.
 This is because if the threat agent is able to unlock the phone, they should be able to enrol their own biometrics and therefore activate the code generation in the android application.
+
 The risk of access in this way is mitigated in a few different ways.
-Enrolling a fingerprint with android  and then generating an unlock code would typically takes upwards of a minute, which would likely arrouse the suspiscion of the owner.
-The impact of this kind of attack could be further reduced if guidance was added to the android application telling users to be aware of such social engineering attacks and not to share their phone wiht strangers without being aware of what they're doing.
-The other mitigation of this kind of attack relies on the expiry time of the single-use code, as the adversary would have to get to the door lock in time to use the comprimised code --- which is likely take a significant amount of time due phsycial distance.
-A sophisticated attack could have another adversary located closer to the door, but this level of organization is uncharacteristic for an oppourtunistic threat agent.
+Enrolling a fingerprint with android  and then generating an unlock code would typically takes upwards of a minute, which would likely arouse the suspicion of the owner.
+The impact of this kind of attack could be further reduced if guidance was added to the android application telling users to be aware of such social engineering attacks and not to share their phone with strangers without being aware of what they're doing.
+The other mitigation of this kind of attack relies on the expiry time of the single-use code, as the adversary would have to get to the door lock in time to use the compromised code --- which is likely take a significant amount of time due physical distance.
+A sophisticated attack could have another adversary located closer to the door, but this level of organization is uncharacteristic for an opportunistic threat agent.
 
 \subsection{Limitations}
-As mentioned before, the phsycial security of our prototype device was out of scope for this project, but would be an important part of the design if we wanted to bring a product like this to market.
+As mentioned before, the physical security of our prototype device was out of scope for this project, but would be an important part of the design if we wanted to bring a product like this to market.
 Our prototype, however, did suffer from a few limitations which impeded both security and usability.
 
-An auto-login feature would greatly improve user effiency, and would not impair security significantly, as biometrics would still be needed to generate a code.
+An auto-login feature would greatly improve user efficiency, and would not impair security significantly, as biometrics would still be needed to generate a code.
 This enhancement to the mobile application could easily half the time needed to generate a code in the app, as currently the app will force a user to log in manually if it has not been opened recently (if the activity has not yet been started or has been killed by android).
-Currently, this limitation significantly impairs the user experience of using our entire system, as typing a username and password is not only a time consuming acitivity, but a fairly difficult and precise process.
+Currently, this limitation significantly impairs the user experience of using our entire system, as typing a username and password is not only a time consuming activity, but a fairly difficult and precise process.
 Most users would have to stand still in order to do this, which is frustrating for a potential user.
 With an auto-login feature no precise actions are required, meaning a user could generate a code as they walk up to the door and would only have to stop to type in the code --- the same as a traditional keypad lock.
 
 Somewhat counter-intuitively, it would increase the overall security of the system to remove the ability of users to manually set the expiry time of codes.
-The current behavior limits the effectiveness of the TOTP codes and encourages users to generate codes ahead of time, making the system much less secure.
-This would force codes to always expire after a certain, short, amount of time (eg two minutes); which would force users to only generate codes when they intent to use them immediately.
+The current behaviour limits the effectiveness of the TOTP codes and encourages users to generate codes ahead of time, making the system much less secure.
+This would force codes to always expire after a certain, short, amount of time (eg. two minutes); which would force users to only generate codes when they intent to use them immediately.
 Another benefit of this change would be that the speed of generating a code would improve, as it would be another step that the user would not have to do.
 
 Another significant limitation of our design is that a planned `failure mode' was not integrated. This is where the lock would accept a more secure (eight digits) long-term code to unlock if the user was to not have access to their phone.
-This was not implemtned into our prototype due to the additional development effort that would be needed
-It does, also, pose a signficant security issue --- as it subverts a signficant amount of the security design in the core product.
-We demed that it would be neccesairy in a commercial product but did not resolve the challenges associated with designing such a protocol, essentiall making it easy for the legitimate users while keeping the lock secure.
+This was not implemented into our prototype due to the additional development effort that would be needed.
+It does, also, pose a significant security issue --- as it subverts a significant amount of the security design in the core product.
+We deemed that it would be necessary in a commercial product but did not resolve the challenges associated with designing such a protocol, essentially making it easy for the legitimate users while keeping the lock secure.
 This would be a great avenue for future research.
 
 \subsection{Overall Findings}
@@ -284,11 +286,20 @@ Overall, we found that security was significantly increased by using our system 
 However it is, of course, more inconvenient to use our system over a traditional keypad-based access control system. 
 
 We believe that the compromise is likely to be accepted by the majority of security-conscious consumers, as well as many large corporations currently utilizing keypad door locks.
-Corporations pose signficant potential customers for this kind of system, as the value of assets protected by access control systems can be massive, and the traceability offered by a system such as ours would be very useful when many different people might need access at different times.
+Corporations pose significant potential customers for this kind of system, as the value of assets protected by access control systems can be massive, and the traceability offered by a system such as ours would be very useful when many different people might need access at different times.
 
 
 
 \section{Conclusion}
+Our project showcased a simple enhancement to a traditional keypad-based door lock which greatly enhanced security with only a small unit cost and slight extra inconvenience to the user.
+
+It was established that users would only accept a new security device if they deemed that the security benefits outweighed the cost (both financial and time).
+Our design aimed to make the security benefits clear to users, which was shown to be successful with our positive user trial.
+
+On the other hand, our project was limited in scope --- we did not fully develop protocols for edge cases where a user  does not have access to a phone, or aim to test the physical security of our prototype device.
+
+Overall we believe that our project is a great proof of concept for future development.
+It is indicated by our findings that a commercial product with similar features and design would stand a good chance of attracting demand if bought to market at the right price point. 
 
 % \begin{table}[htbp]
 % \caption{Table Type Styles}
